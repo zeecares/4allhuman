@@ -34,6 +34,25 @@ type VerifyResponse = {
   openCrawlers: string[];
 };
 
+type RadarEngineResult = {
+  engine: string;
+  status: "answered" | "no-key" | "error";
+  answers?: { probe: string; answer: string }[];
+  error?: string;
+  containment?: number;
+  level?: "CLEAN" | "SUSPICIOUS" | "COPIED";
+  matches?: { source: string; answer: string }[];
+};
+
+type RadarResponse = {
+  domain: string;
+  probes: string[];
+  sourceHash: string;
+  scannedAt: string;
+  results: RadarEngineResult[];
+  unconfigured: RadarEngineResult[];
+};
+
 const EXAMPLES = [
   { label: "en.wikipedia.org — unprotected", url: "en.wikipedia.org" },
   { label: "www.theverge.com — partial", url: "www.theverge.com" },
@@ -94,6 +113,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResponse | null>(null);
 
+  // radar state
+  const [radarUrl, setRadarUrl] = useState("");
+  const [radarText, setRadarText] = useState("");
+  const [radarLoading, setRadarLoading] = useState(false);
+  const [radarError, setRadarError] = useState<string | null>(null);
+  const [radarResult, setRadarResult] = useState<RadarResponse | null>(null);
+
   // verify-your-fix state
   const [robotsDraft, setRobotsDraft] = useState("");
   const [aiTxtDraft, setAiTxtDraft] = useState("");
@@ -130,6 +156,48 @@ export default function Home() {
   async function handleScan(e: React.FormEvent) {
     e.preventDefault();
     runScan(url);
+  }
+
+  async function handleRadar() {
+    setRadarLoading(true);
+    setRadarError(null);
+    setRadarResult(null);
+    try {
+      const res = await fetch("/api/radar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          radarUrl.trim() ? { url: radarUrl.trim() } : { text: radarText },
+        ),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Radar run failed");
+      setRadarResult(data);
+    } catch (err) {
+      setRadarError(err instanceof Error ? err.message : "Radar run failed");
+    } finally {
+      setRadarLoading(false);
+    }
+  }
+
+  function downloadEvidencePack() {
+    if (!radarResult) return;
+    const pack = {
+      tool: "Don't Train On Me — Radar v0.1",
+      generatedAt: new Date().toISOString(),
+      subject: radarResult.domain,
+      sourceSha256: radarResult.sourceHash,
+      probesUsed: radarResult.probes,
+      findings: [...radarResult.results, ...radarResult.unconfigured],
+      methodology:
+        "Word 8-gram containment between engine answers and source text; >=10% = COPIED, 2-9% = SUSPICIOUS.",
+    };
+    const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `evidence-pack-${radarResult.domain}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
   }
 
   async function handleVerify() {
@@ -369,6 +437,109 @@ export default function Home() {
           </section>
         </>
       )}
+
+      {/* ── 09 · radar ── */}
+      <section className="card verify-card">
+        <h2>
+          <span className="num">09</span> RADAR — INTERROGATE ANSWER ENGINES ABOUT YOUR WORK
+        </h2>
+        <div className="body">
+          <p className="method-note" style={{ borderTop: "none", margin: "0 0 14px" }}>
+            Paste your article or give us its URL. We ask configured AI engines questions only your
+            content can answer, then diff their replies against your text with 8-gram plagiarism
+            forensics. A hit is evidence of reproduction — timestamped and hash-sealed.
+          </p>
+          <div className="draft-row">
+            <label className="draft-label grow">
+              Article URL
+              <input
+                className="radar-input"
+                onChange={(e) => setRadarUrl(e.target.value)}
+                placeholder="https://yoursite.com/your-article"
+                value={radarUrl}
+              />
+            </label>
+          </div>
+          <label className="draft-label">
+            …or paste the full text (≥80 words)
+            <textarea
+              onChange={(e) => setRadarText(e.target.value)}
+              placeholder="Paste your original work here…"
+              rows={6}
+              value={radarText}
+            />
+          </label>
+          <button
+            className="verify-btn"
+            disabled={radarLoading || (!radarUrl.trim() && radarText.split(/\s+/).length < 80)}
+            onClick={handleRadar}
+          >
+            {radarLoading ? "Interrogating engines… (up to 60s)" : "Run radar →"}
+          </button>
+          {radarError && <p className="error">⚠️ {radarError}</p>}
+
+          {radarResult && (
+            <div style={{ marginTop: 20 }}>
+              <div className="score-row">
+                <div className={`score-big ${
+                  radarResult.results.some((r) => r.level === "COPIED")
+                    ? "score-bad"
+                    : radarResult.results.some((r) => r.level === "SUSPICIOUS")
+                      ? "score-mid"
+                      : "score-good"
+                }`}>
+                  {radarResult.results.filter((r) => r.status === "answered").length} /{" "}{
+                    radarResult.results.length + radarResult.unconfigured.length
+                  }
+                  <span className="score-sub">ENGINES PROBED</span>
+                </div>
+                <ul className="breakdown">
+                  {radarResult.probes.map((p, i) => (
+                    <li key={i}>
+                      <span className="ua">probe {i + 1}: {p.slice(0, 70)}…</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {[...radarResult.results, ...radarResult.unconfigured].map((r) => (
+                <div key={r.engine} className="card" style={{ marginTop: 12 }}>
+                  <h2>
+                    <span className="led" style={{
+                      background:
+                        r.level === "COPIED" ? "var(--red)" :
+                        r.level === "SUSPICIOUS" ? "var(--orange)" :
+                        r.status === "answered" ? "var(--green)" : "var(--muted)",
+                      boxShadow: r.level === "COPIED" || r.status === "error"
+                        ? `0 0 6px ${r.level === "COPIED" ? "rgba(224,49,49,.7)" : "transparent"}`
+                        : undefined,
+                    }} />
+                    {r.engine.toUpperCase()}
+                    <span className="muted-right">
+                      {r.status === "answered" && r.level != null && `${r.level} — ${r.containment}% overlap`}
+                      {r.status === "no-key" && "NO API KEY CONFIGURED"}
+                      {r.status === "error" && `ERROR: ${(r.error ?? "").slice(0, 40)}`}
+                    </span>
+                  </h2>
+                  {r.matches && r.matches.length > 0 && (
+                    <div className="body">
+                      {r.matches.map((m, i) => (
+                        <blockquote key={i} className="match-quote">
+                          “{m.answer}”
+                        </blockquote>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <button className="copy-btn" onClick={downloadEvidencePack} style={{ marginTop: 12 }}>
+                ⬇ download evidence pack (.json)
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ── honesty module: what this can and cannot do ── */}
       <section className="card trust-card">

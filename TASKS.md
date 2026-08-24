@@ -43,6 +43,13 @@ Next.js App Router; POST /api/protect orchestrates scan→generate→score.
       agent) → live demo → EU AI Act compliance hook
 - [ ] Record 60s backup video of the demo in case wifi fails at the venue
 
+## ✅ T10 — Radar module (built)
+- [x] `src/lib/radar.ts`: probe generation, 8-gram plagiarism forensics, engine adapters
+- [x] `POST /api/radar` (maxDuration 60s, parallel engines, graceful no-key degradation)
+- [x] UI module 09: URL/paste input, per-engine verdict LEDs, matched-span quotes,
+      downloadable JSON evidence pack with source SHA-256
+- [ ] Set OPENAI/PERPLEXITY/ANTHROPIC keys in Vercel env vars to enable live probing
+
 ## Demo script (90 seconds)
 1. Scan `en.wikipedia.org` → score 15/100, wall of red "CAN TRAIN" chips
 2. "One paste fixes this" → copy robots.txt section

@@ -71,6 +71,26 @@ src/
     └── generator.ts          # artifact generation + weighted protection score
 ```
 
+## Radar (module 09)
+
+Paste an article (or its URL) → the tool interrogates configured AI engines with questions
+only your content can answer → diffs replies against your text using word 8-gram plagiarism
+forensics → issues a hash-sealed evidence pack.
+
+Configure engines via env vars (all optional; unconfigured engines show as `no-key`):
+
+```
+OPENAI_API_KEY=...        # gpt-4o-mini
+PERPLEXITY_API_KEY=...    # sonar (live web search — the primary answer-engine target)
+ANTHROPIC_API_KEY=...     # claude haiku
+```
+
+On Vercel: Project Settings → Environment Variables. Redeploy after adding keys.
+
+Thresholds: ≥10% 8-gram containment = **COPIED**, 2–9% = SUSPICIOUS, else CLEAN.
+8 consecutive shared words is the classical plagiarism-forensics threshold — chance
+co-occurrence is effectively zero.
+
 ## Roadmap (see TASKS.md)
 
 - [x] Scanner, generators, scoring, UI
