@@ -16,6 +16,7 @@ type ScanResponse = {
     openCrawlers: string[];
     metaTagsFound: string[];
     aiTxtFound: boolean;
+    scannedAt: string;
   };
   artifacts: {
     robotsSnippet: string;
@@ -34,8 +35,8 @@ type VerifyResponse = {
 };
 
 const EXAMPLES = [
-  { label: "en.wikipedia.org (unprotected)", url: "en.wikipedia.org" },
-  { label: "www.theverge.com (partial)", url: "www.theverge.com" },
+  { label: "en.wikipedia.org — unprotected", url: "en.wikipedia.org" },
+  { label: "www.theverge.com — partial", url: "www.theverge.com" },
 ];
 
 function scoreClass(score: number) {
@@ -60,12 +61,23 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+/** Link to the raw evidence so every claim can be checked by hand. */
+function EvidenceLink({ url, path }: { url: string; path: string }) {
+  return (
+    <a className="evidence-link" href={`${url}${path}`} target="_blank" rel="noreferrer noopener">
+      view live ↗
+    </a>
+  );
+}
+
 function SkeletonCard() {
   return (
     <div className="card" aria-busy="true">
-      <h2>Scanning…</h2>
+      <h2>
+        <span className="num">··</span> SCANNING…
+      </h2>
       <div className="body">
-        <div className="skeleton-line w40" />
+        <div className="skeleton-line" />
         <div className="skeleton-grid">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="skeleton-chip" />
@@ -146,10 +158,11 @@ export default function Home() {
         <span className="shield">🛡️</span> Don&apos;t Train On Me
       </h1>
       <p className="tagline">
-        Scan any site&apos;s exposure to AI training crawlers → get a protection score + ready-to-deploy
-        opt-outs (robots.txt, ai.txt, meta tags, EU Art. 4(3) reservation).
+        Measure your site&apos;s exposure to AI training crawlers. Deploy machine-readable opt-outs.
+        Verify the fix yourself. Every result links to the raw evidence.
       </p>
 
+      {/* ── 01 · input ── */}
       <form className="scan-form" onSubmit={handleScan}>
         <input
           value={url}
@@ -159,12 +172,12 @@ export default function Home() {
           type="text"
         />
         <button disabled={loading} type="submit">
-          {loading ? "Scanning…" : "Scan & Protect"}
+          {loading ? "Scanning…" : "Scan"}
         </button>
       </form>
 
       <div className="examples">
-        <span>Try:</span>
+        <span>or try:</span>
         {EXAMPLES.map((ex) => (
           <button
             key={ex.url}
@@ -187,71 +200,88 @@ export default function Home() {
         <>
           {!result.scan.reachable && (
             <p className="error">
-              ⚠️ Site unreachable — showing worst-case score. The generated artifacts below are still
-              valid to deploy.
+              ⚠️ Site unreachable — score shown is worst-case. Generated artifacts below remain valid
+              to deploy.
             </p>
           )}
 
+          {/* ── 02 · verdict ── */}
           <section className="card">
-            <h2>Protection Score — {result.scan.url}</h2>
+            <h2>
+              <span className="num">02</span> VERDICT — {result.scan.url}
+              <span className="muted-right">scanned {new Date(result.scan.scannedAt ?? Date.now()).toUTCString()}</span>
+            </h2>
             <div className="body score-row">
               <div className={`score-big ${scoreClass(result.score.score)}`}>
                 {result.score.score}
+                <span className="score-sub">EXPOSURE SCORE / 100</span>
               </div>
               <ul className="breakdown">
                 {result.score.breakdown.map((b) => (
                   <li key={b.label}>
                     <span>{b.label}</span>
-                    <b>{b.got}/{b.max}</b>
+                    <b>
+                      {b.got}/{b.max}
+                    </b>
                   </li>
                 ))}
               </ul>
             </div>
+            <p className="method-note">
+              Score = weighted coverage of known opt-out signals. Weights are fixed and published —
+              no black box, no account, nothing stored.
+            </p>
           </section>
 
+          {/* ── 03 · evidence ── */}
           <section className="card">
             <h2>
-              AI Training Crawlers
-              <span style={{ color: "var(--muted)", fontSize: "0.8rem", fontWeight: 400 }}>
-                {result.scan.blockedCrawlers.length} blocked /{" "}
-                {result.scan.blockedCrawlers.length + result.scan.openCrawlers.length} known
-              </span>
+              <span className="num">03</span> EVIDENCE — AI TRAINING CRAWLERS
+              <EvidenceLink path="/robots.txt" url={result.scan.url} />
             </h2>
             <div className="body crawler-grid">
               {[...result.scan.blockedCrawlers, ...result.scan.openCrawlers].map((ua) => {
                 const blocked = result.scan.blockedCrawlers.includes(ua);
                 return (
                   <div key={ua} className={`chip ${blocked ? "blocked" : "open"}`}>
-                    <span>{ua}</span>
-                    <span>{blocked ? "BLOCKED" : "CAN TRAIN"}</span>
+                    <span className="led" />
+                    <span className="ua">{ua}</span>
+                    <span className="state">{blocked ? "BLOCKED" : "CAN TRAIN"}</span>
                   </div>
                 );
               })}
             </div>
+            <p className="method-note">
+              Read directly from this site&apos;s live robots.txt at scan time — follow the link above
+              to check it yourself. Green means a group disallowing all paths was found for that
+              user-agent.
+            </p>
           </section>
 
+          {/* ── 04 · the fix ── */}
           <section className="card">
             <h2>
-              1. robots.txt — append this section
+              <span className="num">04</span> THE FIX — APPEND TO ROBOTS.TXT
               <CopyButton text={result.artifacts.robotsSnippet} />
             </h2>
             <div className="body">
               <pre>{result.artifacts.fullRobotsTxt}</pre>
-              <p style={{ color: "var(--muted)", fontSize: "0.8rem" }}>
-                This is also your machine-readable rights reservation under EU DSM Directive
-                Art. 4(3), which GPAI providers must honor per EU AI Act Art. 53(1)(c).
+              <p className="method-note">
+                This doubles as your rights reservation under EU DSM Directive Art. 4(3), which
+                general-purpose AI providers must honor per EU AI Act Art. 53(1)(c). It binds only
+                compliant crawlers — see “what this can and cannot do” below.
               </p>
             </div>
           </section>
 
-          {/* ---- Verify your fix ---- */}
+          {/* ── 05 · verify ── */}
           <section className="card verify-card">
             <h2>
-              ✅ Verify your fix — paste what you deployed, re-score instantly
+              <span className="num">05</span> VERIFY THE FIX — PASTE WHAT YOU DEPLOYED
             </h2>
             <div className="body">
               <label className="draft-label">
-                robots.txt (deployed)
+                robots.txt (as deployed)
                 <textarea
                   onChange={(e) => setRobotsDraft(e.target.value)}
                   rows={8}
@@ -276,12 +306,8 @@ export default function Home() {
                   />
                 </label>
               </div>
-              <button
-                className="verify-btn"
-                disabled={verifying}
-                onClick={handleVerify}
-              >
-                {verifying ? "Verifying…" : "Re-score my deployment →"}
+              <button className="verify-btn" disabled={verifying} onClick={handleVerify}>
+                {verifying ? "Verifying…" : "Re-score deployment →"}
               </button>
               {verifyError && <p className="error">⚠️ {verifyError}</p>}
 
@@ -289,18 +315,20 @@ export default function Home() {
                 <div className="after-row">
                   <div className={`score-big ${scoreClass(result.score.score)}`}>
                     {result.score.score}
-                    <div className="before-label">before</div>
+                    <span className="score-sub">BEFORE</span>
                   </div>
                   <div className="arrow">→</div>
                   <div className={`score-big ${scoreClass(verified.score.score)}`}>
                     {verified.score.score}
-                    <div className="before-label">after</div>
+                    <span className="score-sub">AFTER</span>
                   </div>
                   <ul className="breakdown">
                     {verified.score.breakdown.map((b) => (
                       <li key={b.label}>
                         <span>{b.label}</span>
-                        <b>{b.got}/{b.max}</b>
+                        <b>
+                          {b.got}/{b.max}
+                        </b>
                       </li>
                     ))}
                   </ul>
@@ -309,9 +337,10 @@ export default function Home() {
             </div>
           </section>
 
+          {/* ── 06–08 · remaining artifacts ── */}
           <section className="card">
             <h2>
-              2. Publish at /ai.txt
+              <span className="num">06</span> ALSO PUBLISH AT /AI.TXT
               <CopyButton text={result.artifacts.aiTxt} />
             </h2>
             <div className="body">
@@ -321,7 +350,7 @@ export default function Home() {
 
           <section className="card">
             <h2>
-              3. Add to every page&apos;s &lt;head&gt;
+              <span className="num">07</span> ADD TO EVERY PAGE&apos;S &lt;HEAD&gt;
               <CopyButton text={result.artifacts.metaTags} />
             </h2>
             <div className="body">
@@ -331,7 +360,7 @@ export default function Home() {
 
           <section className="card">
             <h2>
-              4. Legal notice of reserved rights
+              <span className="num">08</span> LEGAL NOTICE OF RESERVED RIGHTS
               <CopyButton text={result.artifacts.legalNotice} />
             </h2>
             <div className="body">
@@ -341,10 +370,42 @@ export default function Home() {
         </>
       )}
 
+      {/* ── honesty module: what this can and cannot do ── */}
+      <section className="card trust-card">
+        <h2>
+          <span className="num">§</span> WHAT THIS CAN AND CANNOT DO
+        </h2>
+        <div className="body trust-body">
+          <div>
+            <h3>✓ Can</h3>
+            <ul>
+              <li>Measure exposure against 19 documented AI training crawlers</li>
+              <li>Publish legally meaningful opt-outs (EU DSM Art. 4(3))</li>
+              <li>Create obligations for GPAI providers under EU AI Act Art. 53(1)(c)</li>
+              <li>Verify your deployed configuration, with evidence links</li>
+            </ul>
+          </div>
+          <div>
+            <h3>✗ Cannot</h3>
+            <ul>
+              <li>Physically stop a scraper that ignores robots.txt</li>
+              <li>Audit what any model was actually trained on</li>
+              <li>Detect unauthorized use of your content post-training</li>
+              <li>Replace legal advice — this is a technical control, not counsel</li>
+            </ul>
+          </div>
+        </div>
+        <p className="method-note trust-footnote">
+          The only complete protection is access control: content that was never fetched cannot be
+          trained on. Everything here reduces exposure within the limits of public-web publishing.
+        </p>
+      </section>
+
       <footer>
-        Opt-out signals are honored by compliant crawlers and form the machine-readable basis of an
-        EU DSM Art. 4(3) reservation. See our research notes in{" "}
-        <a href="https://github.com/your-repo/research">/research</a>.
+        Open source · nothing stored · methodology and research notes in{" "}
+        <a href="https://github.com/zeecares/4allhuman" target="_blank" rel="noreferrer noopener">
+          github.com/zeecares/4allhuman
+        </a>
       </footer>
     </main>
   );

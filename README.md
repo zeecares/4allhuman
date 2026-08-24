@@ -17,6 +17,23 @@ Paste your domain → get a protection score → receive ready-to-deploy opt-out
 
 Full research notes: [`research/protecting-human-content-from-ai-training.md`](./research/protecting-human-content-from-ai-training.md)
 
+## Design principles (first-principles trust)
+
+The product reduces an information asymmetry between creators and AI trainers. Trust
+follows from three commitments baked into the UI:
+
+1. **Verifiability over assertion** — every scan result links to the raw evidence
+   (the live `robots.txt` we read), with a UTC timestamp. Users can re-do any check by hand.
+2. **Honest limits, stated up front** — the "What this can / cannot do" module says plainly:
+   signals bind compliant crawlers only; we cannot audit what a model was trained on; access
+   control is the only complete protection. Overclaiming is the fastest way to lose trust.
+3. **No black boxes** — fixed, published score weights; no accounts; nothing stored;
+   open-source methodology.
+
+Visual language follows Teenage Engineering's industrial design: flat panels, hard edges,
+warm-grey chassis, signature orange accents, monospace labels, LED status indicators,
+numbered modules — instruments, not marketing.
+
 ## Run it
 
 ```bash
