@@ -17,6 +17,23 @@ Paste your domain → get a protection score → receive ready-to-deploy opt-out
 
 Full research notes: [`research/protecting-human-content-from-ai-training.md`](./research/protecting-human-content-from-ai-training.md)
 
+## What this can and cannot guarantee
+
+**No tool can make already-public content untrainable.** Anyone can download what anyone
+can read. Our artifacts are signals + legal reservations, not force fields:
+
+| Level | Mechanism | Strength |
+|---|---|---|
+| Never expose it | Login/paywall/app | ✅ True guarantee — unfetched bytes can't be trained on |
+| Legal reservation (EU) | robots.txt Art. 4(3) statement | ⚠️ Doesn't prevent copying; makes it *infringing* for EU-regulated GPAI providers |
+| Contract | No-training terms on private sharing | ⚠️ After-the-fact claim |
+| Public + signals only | robots.txt alone, no jurisdiction | ❌ Honor system |
+
+This tool sits in rows 2–3: it measures exposure, perfects the strongest legal lever available,
+and verifies deployment. For a true guarantee, keep content behind access control.
+
+See `research/protecting-human-content-from-ai-training.md` for sources.
+
 ## Design principles (first-principles trust)
 
 The product reduces an information asymmetry between creators and AI trainers. Trust
