@@ -14,6 +14,7 @@ export type GeneratedArtifacts = {
   aiTxt: string;
   metaTags: string;
   legalNotice: string;
+  rslXml: string;
 };
 
 export function generateRobotsSnippet(blocked: string[]): string {
@@ -59,18 +60,40 @@ export function generateLegalNotice(domain: string): string {
   ].join("\n");
 }
 
+/**
+ * RSL 1.0 license document (rslstandard.org schema, verified against the
+ * official Getting Started guide). Default posture: prohibit AI training/input,
+ * matching our opt-out stance. Creators can swap in a payment/custom template.
+ */
+export function generateRsl(): string {
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<rsl xmlns="https://rslstandard.org/rsl">',
+    '  <content url="/">',
+    '    <!-- AI training and AI-input prohibited; web search and human use permitted -->',
+    '    <license>',
+    '      <prohibits type="usage">ai-train ai-input</prohibits>',
+    '    </license>',
+    '  </content>',
+    '</rsl>',
+  ].join("\n");
+}
+
 export function generateAllArtifacts(scan: ScanResult): GeneratedArtifacts {
   // Block everything still open; keep already-blocked ones too so the
   // snippet is a complete drop-in replacement.
   const toBlock = scan.openCrawlers.length ? scan.openCrawlers : AI_CRAWLERS.map((c) => c.userAgent);
+  const robots = generateRobotsSnippet(toBlock);
   return {
-    robotsSnippet: generateRobotsSnippet(toBlock),
+    robotsSnippet: robots,
     fullRobotsTxt:
       (scan.robotsFound ? "# Append the section below to your existing robots.txt\n\n" : "") +
-      generateRobotsSnippet(toBlock),
+      robots +
+      `\n# RSL 1.0 machine-readable license (Really Simple Licensing)\nLicense: ${scan.url}/license.xml`,
     aiTxt: generateAiTxt(scan.url),
     metaTags: generateMetaTags(),
     legalNotice: generateLegalNotice(scan.url),
+    rslXml: generateRsl(),
   };
 }
 

@@ -50,6 +50,13 @@ Next.js App Router; POST /api/protect orchestrates scan→generate→score.
       downloadable JSON evidence pack with source SHA-256
 - [x] v0.2: manual probe mode — no API keys needed; analysis runs client-side
 
+## ✅ T11 — Enhancement trio (built)
+- [x] Common Crawl corpus check: GET /api/commoncrawl queries latest 6 CDX
+      indexes per domain (verified live API); verdict card YES/NO with per-crawl counts
+- [x] DE-COP memorization probe: deterministic MCQ generation (verbatim vs rule-based
+      paraphrases), copy-ask-record flow, binomial scoring vs 25% chance line
+- [x] RSL 1.0 /license.xml generator + `License:` line added to robots.txt artifacts
+
 ## Demo script (90 seconds)
 1. Scan `en.wikipedia.org` → score 15/100, wall of red "CAN TRAIN" chips
 2. "One paste fixes this" → copy robots.txt section

@@ -85,6 +85,18 @@ Thresholds: ≥10% word-8-gram containment = **COPIED**, 2–9% = SUSPICIOUS, el
 8 consecutive shared words is the classical plagiarism-forensics threshold — chance
 co-occurrence is effectively zero.
 
+## Modules
+
+| # | Module | What it does |
+|---|---|---|
+| 02 | Verdict | Weighted 0–100 protection score with published weights |
+| 03 | Evidence | Live robots.txt check across 19 AI crawlers, with source links |
+| 04 | Common Crawl | Checks the 6 latest CC indexes for your domain — the open corpus most training sets build on |
+| 05–09 | The Fix | robots.txt (+ EU Art. 4(3) reservation + RSL `License:` line), verify-your-fix, ai.txt, meta tags, legal notice |
+| 10 | RSL License | `/license.xml` in RSL 1.0 schema — machine-readable licensing for the AI-first web |
+| 11 | Radar | Manual probe mode: generate questions → ask engines yourself → local 8-gram forensics; plus **DE-COP memorization quiz** (arXiv 2402.09910) scoring verbatim-recognition against the 25% chance line |
+| §§ | Honesty layer | What this can and cannot do |
+
 ## Roadmap (see TASKS.md)
 
 - [x] Scanner, generators, scoring, UI

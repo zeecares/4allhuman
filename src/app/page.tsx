@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { analyzePair } from "@/lib/radar";
+import { analyzePair, makeMcq, scoreMcq } from "@/lib/radar";
 
 type ScoreResult = {
   score: number;
@@ -25,6 +25,7 @@ type ScanResponse = {
     aiTxt: string;
     metaTags: string;
     legalNotice: string;
+    rslXml: string;
   };
   score: ScoreResult;
 };
@@ -40,6 +41,16 @@ type ProbeData = {
   probes: string[];
   sourceHash: string;
   wordCount: number;
+};
+
+type CcCrawl = { id: string; name: string; captures: number | null; error?: string };
+type CcResponse = {
+  domain: string;
+  inCorpus: boolean;
+  totalCaptures: number;
+  indexesChecked: number;
+  crawls: CcCrawl[];
+  checkedAt: string;
 };
 
 type EngineAnalysis = {
@@ -119,6 +130,17 @@ export default function Home() {
   const [engineResponses, setEngineResponses] = useState<Record<string, string>>({});
   const [analyses, setAnalyses] = useState<EngineAnalysis[] | null>(null);
 
+  // common crawl state
+  const [ccDomain, setCcDomain] = useState("");
+  const [ccLoading, setCcLoading] = useState(false);
+  const [ccError, setCcError] = useState<string | null>(null);
+  const [ccData, setCcData] = useState<CcResponse | null>(null);
+
+  // de-cop state
+  const [mcqItems, setMcqItems] = useState<ReturnType<typeof makeMcq> | null>(null);
+  const [mcqAnswers, setMcqAnswers] = useState<Record<number, string>>({});
+  const [mcqScore, setMcqScore] = useState<ReturnType<typeof scoreMcq>>(null);
+
   // verify-your-fix state
   const [robotsDraft, setRobotsDraft] = useState("");
   const [aiTxtDraft, setAiTxtDraft] = useState("");
@@ -141,6 +163,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Scan failed");
       setResult(data);
+      setCcDomain(new URL(data.scan.url).hostname); // prefill corpus check
       // prefill verification drafts with our generated artifacts
       setRobotsDraft(data.artifacts.fullRobotsTxt);
       setAiTxtDraft(data.artifacts.aiTxt);
@@ -192,6 +215,36 @@ export default function Home() {
       results.push({ engine, ...a });
     }
     setAnalyses(results.length ? results : []);
+  }
+
+  async function checkCommonCrawl(domain?: string) {
+    const target = (domain ?? ccDomain).trim();
+    if (!target) return;
+    setCcLoading(true);
+    setCcError(null);
+    setCcData(null);
+    try {
+      const res = await fetch(`/api/commoncrawl?domain=${encodeURIComponent(target)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Common Crawl lookup failed");
+      setCcData(data);
+    } catch (err) {
+      setCcError(err instanceof Error ? err.message : "Common Crawl lookup failed");
+    } finally {
+      setCcLoading(false);
+    }
+  }
+
+  function generateMcq() {
+    if (!sourceForAnalysis) return;
+    setMcqItems(makeMcq(sourceForAnalysis, 3));
+    setMcqAnswers({});
+    setMcqScore(null);
+  }
+
+  function analyzeMcq() {
+    if (!mcqItems) return;
+    setMcqScore(scoreMcq(mcqItems, mcqAnswers));
   }
 
   function downloadEvidencePack() {
@@ -345,10 +398,62 @@ export default function Home() {
             </p>
           </section>
 
+          {/* ── 04 · common crawl corpus check ── */}
+          <section className="card">
+            <h2>
+              <span className="num">04</span> COMMON CRAWL — ARE YOU ALREADY IN THE TRAINING CORPUS?
+            </h2>
+            <div className="body">
+              <p className="method-note" style={{ borderTop: "none", margin: "0 0 12px" }}>
+                Common Crawl is the open web corpus most AI training datasets are built from. We
+                check the six latest monthly indexes for your domain — free, keyless, factual.
+              </p>
+              <div className="scan-form" style={{ marginBottom: 12 }}>
+                <input
+                  onChange={(e) => setCcDomain(e.target.value)}
+                  placeholder="example.com"
+                  value={ccDomain}
+                />
+                <button disabled={ccLoading || !ccDomain.trim()} onClick={() => checkCommonCrawl()}>
+                  {ccLoading ? "Checking indexes…" : "Check corpus"}
+                </button>
+              </div>
+              {ccError && <p className="error">⚠️ {ccError}</p>}
+              {ccData && (
+                <>
+                  <div className="score-row" style={{ marginBottom: 12 }}>
+                    <div
+                      className={`score-big ${ccData.inCorpus ? "score-bad" : "score-good"}`}
+                      style={{ fontSize: "2.2rem", minWidth: 130 }}
+                    >
+                      {ccData.inCorpus ? "YES" : "NO"}
+                      <span className="score-sub">IN CORPUS</span>
+                    </div>
+                    <ul className="breakdown">
+                      {ccData.crawls.map((c) => (
+                        <li key={c.id}>
+                          <span>
+                            {c.name}
+                            {c.error ? ` (${c.error})` : ""}
+                          </span>
+                          <b>{c.captures === null ? "—" : c.captures}</b>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p className="method-note" style={{ borderTop: "none", margin: 0 }}>
+                    Numbers are capture counts (capped at 200 per index). Being in Common Crawl
+                    means AI trainers could have taken it — not proof that a specific model did.
+                  </p>
+                </>
+              )}
+            </div>
+          </section>
+
           {/* ── 04 · the fix ── */}
           <section className="card">
             <h2>
-              <span className="num">04</span> THE FIX — APPEND TO ROBOTS.TXT
+              <span className="num">05</span> THE FIX — APPEND TO ROBOTS.TXT
               <CopyButton text={result.artifacts.robotsSnippet} />
             </h2>
             <div className="body">
@@ -364,7 +469,7 @@ export default function Home() {
           {/* ── 05 · verify ── */}
           <section className="card verify-card">
             <h2>
-              <span className="num">05</span> VERIFY THE FIX — PASTE WHAT YOU DEPLOYED
+              <span className="num">06</span> VERIFY THE FIX — PASTE WHAT YOU DEPLOYED
             </h2>
             <div className="body">
               <label className="draft-label">
@@ -427,7 +532,7 @@ export default function Home() {
           {/* ── 06–08 · remaining artifacts ── */}
           <section className="card">
             <h2>
-              <span className="num">06</span> ALSO PUBLISH AT /AI.TXT
+              <span className="num">07</span> ALSO PUBLISH AT /AI.TXT
               <CopyButton text={result.artifacts.aiTxt} />
             </h2>
             <div className="body">
@@ -437,7 +542,7 @@ export default function Home() {
 
           <section className="card">
             <h2>
-              <span className="num">07</span> ADD TO EVERY PAGE&apos;S &lt;HEAD&gt;
+              <span className="num">08</span> ADD TO EVERY PAGE&apos;S &lt;HEAD&gt;
               <CopyButton text={result.artifacts.metaTags} />
             </h2>
             <div className="body">
@@ -447,7 +552,7 @@ export default function Home() {
 
           <section className="card">
             <h2>
-              <span className="num">08</span> LEGAL NOTICE OF RESERVED RIGHTS
+              <span className="num">09</span> LEGAL NOTICE OF RESERVED RIGHTS
               <CopyButton text={result.artifacts.legalNotice} />
             </h2>
             <div className="body">
@@ -457,10 +562,27 @@ export default function Home() {
         </>
       )}
 
+      {/* ── 10 · RSL license ── */}
+      <section className="card">
+        <h2>
+          <span className="num">10</span> PUBLISH AT /LICENSE.XML — RSL 1.0 MACHINE-READABLE LICENSE
+          {result && <CopyButton text={result.artifacts.rslXml} />}
+        </h2>
+        <div className="body">
+          <pre>{result?.artifacts.rslXml ?? ""}</pre>
+          <p className="method-note" style={{ borderTop: "none", marginTop: 10 }}>
+            RSL (Really Simple Licensing, rslstandard.org) is the emerging standard for
+            machine-readable licensing and payment terms — the robots.txt line in module 05 points
+            compliant agents here. This template prohibits AI training/input; swap in a payment
+            template to sell licenses instead.
+          </p>
+        </div>
+      </section>
+
       {/* ── 09 · radar (manual probe mode) ── */}
       <section className="card verify-card">
         <h2>
-          <span className="num">09</span> RADAR — CATCH ENGINES REPRODUCING YOUR WORK
+          <span className="num">11</span> RADAR — CATCH ENGINES REPRODUCING YOUR WORK
         </h2>
         <div className="body">
           <p className="method-note" style={{ borderTop: "none", margin: "0 0 14px" }}>
@@ -548,6 +670,100 @@ export default function Home() {
                 Analyze pasted answers →
               </button>
             </>
+          )}
+
+          {/* DE-COP memorization probe */}
+          {probeData && (
+            <div style={{ marginTop: 24 }}>
+              <label className="draft-label">
+                MEMORIZATION PROBE (DE-COP METHOD, ARXIV 2402.09910) — DETECTS TRAINING EVEN
+                WITHOUT VERBATIM OUTPUT
+              </label>
+              {!mcqItems ? (
+                <button className="copy-btn" onClick={generateMcq}>
+                  Generate memorization quiz from your text
+                </button>
+              ) : (
+                <>
+                  <p className="method-note" style={{ borderTop: "none", margin: "0 0 12px" }}>
+                    Ask any chatbot each question and record the letter it picks. A model that
+                    trained on your text picks the verbatim passage above chance (25%). Chance-level
+                    results are evidence of innocence — this test cuts both ways.
+                  </p>
+                  {mcqItems.map((item) => (
+                    <div key={item.id} className="card" style={{ marginTop: 8 }}>
+                      <h2>
+                        <span className="num">Q{item.id + 1}</span>
+                        WHICH PASSAGE IS VERBATIM FROM THE SOURCE?
+                        <CopyButton
+                          text={
+                            `Question ${item.id + 1}: Which of these passages appears verbatim in the original article?\n` +
+                            item.options.map((o) => `${o.letter}. ${o.text}`).join("\n") +
+                            `\nAnswer with just the letter (${item.options.map((o) => o.letter).join("/")}).`
+                          }
+                        />
+                      </h2>
+                      <div className="body">
+                        {item.options.map((o) => (
+                          <div key={o.letter} className="ref-list" style={{ marginBottom: 2 }}>
+                            <li>
+                              <b>{o.letter}.</b> {o.text.slice(0, 140)}
+                              {o.text.length > 140 ? "…" : ""}
+                            </li>
+                          </div>
+                        ))}
+                        <div style={{ marginTop: 10 }}>
+                          <span className="draft-label" style={{ display: "inline", marginRight: 8 }}>
+                            Model picked:
+                          </span>
+                          {["A", "B", "C", "D"].map((L) => (
+                            <button
+                              key={L}
+                              className="example-btn"
+                              style={{
+                                marginRight: 6,
+                                background: mcqAnswers[item.id] === L ? "var(--orange)" : undefined,
+                                color: mcqAnswers[item.id] === L ? "#fff" : undefined,
+                              }}
+                              onClick={() =>
+                                setMcqAnswers((prev) => ({ ...prev, [item.id]: prev[item.id] === L ? "" : L }))
+                              }
+                            >
+                              {L}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="verify-btn" disabled={!Object.keys(mcqAnswers).filter(Boolean).length} onClick={analyzeMcq} style={{ marginTop: 12 }}>
+                    Score memorization probe →
+                  </button>
+                  {mcqScore && (
+                    <div className="score-row" style={{ marginTop: 16 }}>
+                      <div
+                        className={`score-big ${mcqScore.aboveChance ? "score-bad" : "score-good"}`}
+                        style={{ fontSize: "2rem", minWidth: 120 }}
+                      >
+                        {mcqScore.correct}/{mcqScore.total}
+                        <span className="score-sub">
+                          CHANCE IS ~{Math.ceil(mcqScore.chancePct / 100 * mcqScore.total)}/{mcqScore.total}
+                        </span>
+                      </div>
+                      <ul className="breakdown">
+                        <li><span>Accuracy</span><b>{mcqScore.accuracyPct}%</b></li>
+                        <li><span>Chance level</span><b>{mcqScore.chancePct}%</b></li>
+                        <li><span>p-value (approx.)</span><b>{mcqScore.pValueApprox}</b></li>
+                        <li>
+                          <span>{mcqScore.aboveChance ? "ABOVE CHANCE — possible training signal" : "Not distinguishable from chance"}</span>
+                          <b>{mcqScore.aboveChance ? "⚠️" : "✓"}</b>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           )}
 
           {/* step 3 — verdicts */}
