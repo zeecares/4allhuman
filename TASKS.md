@@ -48,7 +48,7 @@ Next.js App Router; POST /api/protect orchestrates scan→generate→score.
 - [x] `POST /api/radar` (maxDuration 60s, parallel engines, graceful no-key degradation)
 - [x] UI module 09: URL/paste input, per-engine verdict LEDs, matched-span quotes,
       downloadable JSON evidence pack with source SHA-256
-- [ ] Set OPENAI/PERPLEXITY/ANTHROPIC keys in Vercel env vars to enable live probing
+- [x] v0.2: manual probe mode — no API keys needed; analysis runs client-side
 
 ## Demo script (90 seconds)
 1. Scan `en.wikipedia.org` → score 15/100, wall of red "CAN TRAIN" chips

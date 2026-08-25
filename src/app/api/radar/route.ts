@@ -1,23 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  analyzePair,
-  configuredEngines,
-  htmlToText,
-  interrogate,
-  makeProbes,
-  sha256,
-  type EngineId,
-  type EngineResult,
-} from "@/lib/radar";
+import { htmlToText, makeProbes, sha256Hex } from "@/lib/radar";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
 
-type RadarRequest = { url?: string; text?: string };
-
+/**
+ * POST /api/radar
+ * Body: { url?: string, text?: string }
+ * Generates probe questions for the creator to ask AI engines themselves.
+ * No LLM calls, no keys. Analysis happens locally in the user's browser.
+ */
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as RadarRequest;
+    const body = (await req.json()) as { url?: string; text?: string };
     let sourceText = (body.text ?? "").trim();
     let domain = "pasted-content";
 
@@ -28,7 +22,10 @@ export async function POST(req: NextRequest) {
         redirect: "follow",
       });
       if (!res.ok) {
-        return NextResponse.json({ error: `Could not fetch ${body.url} (${res.status})` }, { status: 400 });
+        return NextResponse.json(
+          { error: `Could not fetch ${body.url} (${res.status})` },
+          { status: 400 },
+        );
       }
       sourceText = htmlToText(await res.text());
       try {
@@ -38,51 +35,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (sourceText.split(" ").length < 80) {
+    const wordCount = sourceText.split(/\s+/).filter(Boolean).length;
+    if (wordCount < 80) {
       return NextResponse.json(
         { error: "Need at least ~80 words of content to build meaningful probes." },
         { status: 400 },
       );
     }
 
-    const probes = makeProbes(domain, sourceText);
-    const engines = configuredEngines();
-
-    const results = await Promise.all(
-      (engines.length ? engines : []).map(async (engine): Promise<EngineResult> => {
-        try {
-          const answers = await interrogate(engine, probes);
-          const joined = answers.map((a) => a.answer).join("\n");
-          const analysis = analyzePair(sourceText, joined);
-          return { engine, status: "answered", answers, ...analysis };
-        } catch (err) {
-          return {
-            engine,
-            status: "error",
-            answers: [],
-            error: err instanceof Error ? err.message : String(err),
-          } as EngineResult;
-        }
-      }),
-    );
-
     return NextResponse.json({
       domain,
-      probes,
-      sourceHash: sha256(sourceText),
-      sourceExcerpt: sourceText.slice(0, 400),
-      scannedAt: new Date().toISOString(),
-      results,
-      unconfigured: (
-        [
-          !process.env.OPENAI_API_KEY && "openai",
-          !process.env.ANTHROPIC_API_KEY && "anthropic",
-          !process.env.PERPLEXITY_API_KEY && "perplexity",
-        ].filter(Boolean) as EngineId[]
-      ).map((e) => ({ engine: e, status: "no-key", answers: [] }) satisfies EngineResult),
+      probes: makeProbes(domain, sourceText),
+      sourceHash: await sha256Hex(sourceText),
+      sourceText,
+      wordCount,
+      generatedAt: new Date().toISOString(),
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Radar run failed";
+    const message = err instanceof Error ? err.message : "Probe generation failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

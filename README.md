@@ -71,23 +71,17 @@ src/
     └── generator.ts          # artifact generation + weighted protection score
 ```
 
-## Radar (module 09)
+## Radar (module 09) — manual probe mode
 
-Paste an article (or its URL) → the tool interrogates configured AI engines with questions
-only your content can answer → diffs replies against your text using word 8-gram plagiarism
-forensics → issues a hash-sealed evidence pack.
+Paste an article (or its URL) → get generated probe questions → ask ChatGPT /
+Perplexity / Claude / Gemini yourself → paste their answers back → 8-gram plagiarism
+forensics run **locally in your browser**.
 
-Configure engines via env vars (all optional; unconfigured engines show as `no-key`):
+No API keys. No AI-company calls from our servers. Nothing stored. The evidence pack
+(.json download) seals the source text with SHA-256 and records every verdict with
+matched spans.
 
-```
-OPENAI_API_KEY=...        # gpt-4o-mini
-PERPLEXITY_API_KEY=...    # sonar (live web search — the primary answer-engine target)
-ANTHROPIC_API_KEY=...     # claude haiku
-```
-
-On Vercel: Project Settings → Environment Variables. Redeploy after adding keys.
-
-Thresholds: ≥10% 8-gram containment = **COPIED**, 2–9% = SUSPICIOUS, else CLEAN.
+Thresholds: ≥10% word-8-gram containment = **COPIED**, 2–9% = SUSPICIOUS, else CLEAN.
 8 consecutive shared words is the classical plagiarism-forensics threshold — chance
 co-occurrence is effectively zero.
 

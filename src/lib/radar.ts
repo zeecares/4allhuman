@@ -1,11 +1,10 @@
 /**
  * Radar — detect answer engines reproducing creator content.
  *
- * Pipeline: extract probes from source text -> interrogate configured engines ->
- * compare answers against source with n-gram plagiarism forensics -> verdict.
- * Zero dependencies: plain token math + node crypto.
+ * Pipeline: extract probes from source text -> user asks the engines themselves
+ * -> paste responses back -> 8-gram plagiarism forensics run LOCALLY in the
+ * browser. No API keys, nothing sent to AI companies by us, nothing stored.
  */
-import { createHash } from "crypto";
 
 // ── text utilities ──────────────────────────────────────────────────────────
 
@@ -52,7 +51,14 @@ export function topKeywords(text: string, n = 6): string[] {
  * fingerprint material — generic boilerplate would false-positive everywhere.
  */
 function distinctiveSentences(text: string, n = 3): string[] {
-  const sentences = text.split(/(?<=[.!?])\s+/).filter((s) => s.split(" ").length >= 10);
+  const sentences = text.split(/(?<=[.!?])\s+/).filter((s) => {
+    if (s.split(" ").length < 10) return false;
+    // skip citations, references, nav junk: must start with a letter
+    if (!/^[a-zA-Z]/.test(s.trim())) return false;
+    const words = tokenize(s);
+    // need enough real prose words for an 8-gram to be meaningful
+    return words.length >= 16;
+  });
   const scored = sentences.map((s) => {
     const words = tokenize(s);
     const rare = words.filter((w) => w.length > 5 && !STOPWORDS.has(w)).length;
@@ -158,98 +164,10 @@ export function analyzePair(sourceText: string, answerText: string): PairAnalysi
 
 // ── hashing ─────────────────────────────────────────────────────────────────
 
-export function sha256(text: string): string {
-  return createHash("sha256").update(text).digest("hex");
-}
-
-// ── engine adapters ─────────────────────────────────────────────────────────
-
-export type EngineId = "openai" | "anthropic" | "perplexity";
-
-export type EngineResult = {
-  engine: EngineId;
-  status: "answered" | "no-key" | "error";
-  answers: { probe: string; answer: string }[];
-  error?: string;
-  /** present when status === "answered" */
-  containment?: number;
-  level?: PairAnalysis["level"];
-  matches?: MatchSpan[];
-};
-
-async function chatOpenAI(probes: string[]): Promise<string[]> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: probes.map((p) => ({ role: "user", content: p })),
-    }),
-    signal: AbortSignal.timeout(45_000),
-  });
-  if (!res.ok) throw new Error(`openai ${res.status}`);
-  const data = await res.json();
-  return [data.choices?.[0]?.message?.content ?? ""];
-}
-
-async function chatPerplexity(probes: string[]): Promise<string[]> {
-  // sonar searches the live web per query — the archetypal answer-engine target.
-  const answers = await Promise.all(
-    probes.map(async (p) => {
-      const res = await fetch("https://api.perplexity.ai/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ model: "sonar", messages: [{ role: "user", content: p }] }),
-        signal: AbortSignal.timeout(45_000),
-      });
-      if (!res.ok) throw new Error(`perplexity ${res.status}`);
-      const data = await res.json();
-      return data.choices?.[0]?.message?.content ?? "";
-    }),
-  );
-  return answers;
-}
-
-async function chatAnthropic(probes: string[]): Promise<string[]> {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": process.env.ANTHROPIC_API_KEY ?? "",
-      "anthropic-version": "2023-06-01",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "claude-3-5-haiku-latest",
-      max_tokens: 600,
-      messages: [{ role: "user", content: probes.join("\n\n") }],
-    }),
-    signal: AbortSignal.timeout(45_000),
-  });
-  if (!res.ok) throw new Error(`anthropic ${res.status}`);
-  const data = await res.json();
-  return [(data.content?.[0]?.text ?? "").trim()];
-}
-
-export function configuredEngines(): EngineId[] {
-  const engines: EngineId[] = [];
-  if (process.env.OPENAI_API_KEY) engines.push("openai");
-  if (process.env.PERPLEXITY_API_KEY) engines.push("perplexity");
-  if (process.env.ANTHROPIC_API_KEY) engines.push("anthropic");
-  return engines;
-}
-
-export async function interrogate(engine: EngineId, probes: string[]): Promise<{ probe: string; answer: string }[]> {
-  const fns: Record<EngineId, (p: string[]) => Promise<string[]>> = {
-    openai: chatOpenAI,
-    anthropic: chatAnthropic,
-    perplexity: chatPerplexity,
-  };
-  const answers = await fns[engine](probes);
-  return probes.map((probe, i) => ({ probe, answer: answers[i] ?? "" }));
+export async function sha256Hex(text: string): Promise<string> {
+  const data = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }

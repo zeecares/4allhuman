@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { analyzePair } from "@/lib/radar";
 
 type ScoreResult = {
   score: number;
@@ -34,23 +35,18 @@ type VerifyResponse = {
   openCrawlers: string[];
 };
 
-type RadarEngineResult = {
-  engine: string;
-  status: "answered" | "no-key" | "error";
-  answers?: { probe: string; answer: string }[];
-  error?: string;
-  containment?: number;
-  level?: "CLEAN" | "SUSPICIOUS" | "COPIED";
-  matches?: { source: string; answer: string }[];
-};
-
-type RadarResponse = {
+type ProbeData = {
   domain: string;
   probes: string[];
   sourceHash: string;
-  scannedAt: string;
-  results: RadarEngineResult[];
-  unconfigured: RadarEngineResult[];
+  wordCount: number;
+};
+
+type EngineAnalysis = {
+  engine: string;
+  containment: number;
+  level: "CLEAN" | "SUSPICIOUS" | "COPIED";
+  matches: { source: string; answer: string }[];
 };
 
 const EXAMPLES = [
@@ -113,12 +109,15 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResponse | null>(null);
 
-  // radar state
+  // radar state — manual flow: generate probes, user asks engines, pastes back
   const [radarUrl, setRadarUrl] = useState("");
   const [radarText, setRadarText] = useState("");
   const [radarLoading, setRadarLoading] = useState(false);
   const [radarError, setRadarError] = useState<string | null>(null);
-  const [radarResult, setRadarResult] = useState<RadarResponse | null>(null);
+  const [probeData, setProbeData] = useState<ProbeData | null>(null);
+  const [sourceForAnalysis, setSourceForAnalysis] = useState("");
+  const [engineResponses, setEngineResponses] = useState<Record<string, string>>({});
+  const [analyses, setAnalyses] = useState<EngineAnalysis[] | null>(null);
 
   // verify-your-fix state
   const [robotsDraft, setRobotsDraft] = useState("");
@@ -158,44 +157,64 @@ export default function Home() {
     runScan(url);
   }
 
-  async function handleRadar() {
+  const ENGINE_NAMES = ["ChatGPT", "Perplexity", "Claude", "Gemini"];
+
+  async function generateProbes() {
     setRadarLoading(true);
     setRadarError(null);
-    setRadarResult(null);
+    setProbeData(null);
+    setAnalyses(null);
     try {
       const res = await fetch("/api/radar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          radarUrl.trim() ? { url: radarUrl.trim() } : { text: radarText },
-        ),
+        body: JSON.stringify(radarUrl.trim() ? { url: radarUrl.trim() } : { text: radarText }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Radar run failed");
-      setRadarResult(data);
+      if (!res.ok) throw new Error(data.error ?? "Probe generation failed");
+      setProbeData({ domain: data.domain, probes: data.probes, sourceHash: data.sourceHash, wordCount: data.wordCount });
+      setSourceForAnalysis(data.sourceText ?? ""); // kept locally, never leaves the browser again
+
     } catch (err) {
-      setRadarError(err instanceof Error ? err.message : "Radar run failed");
+      setRadarError(err instanceof Error ? err.message : "Probe generation failed");
     } finally {
       setRadarLoading(false);
     }
   }
 
+  function analyzeResponses() {
+    if (!probeData) return;
+    const results: EngineAnalysis[] = [];
+    for (const engine of ENGINE_NAMES) {
+      const response = (engineResponses[engine] ?? "").trim();
+      if (!response) continue;
+      const a = analyzePair(sourceForAnalysis, response);
+      results.push({ engine, ...a });
+    }
+    setAnalyses(results.length ? results : []);
+  }
+
   function downloadEvidencePack() {
-    if (!radarResult) return;
+    if (!probeData || !analyses) return;
     const pack = {
-      tool: "Don't Train On Me — Radar v0.1",
+      tool: "Don't Train On Me — Radar v0.2 (manual probe mode)",
       generatedAt: new Date().toISOString(),
-      subject: radarResult.domain,
-      sourceSha256: radarResult.sourceHash,
-      probesUsed: radarResult.probes,
-      findings: [...radarResult.results, ...radarResult.unconfigured],
+      subject: probeData.domain,
+      sourceSha256: probeData.sourceHash,
+      probesUsed: probeData.probes,
+      findings: analyses.map((a) => ({
+        engine: a.engine,
+        verdict: a.level,
+        containmentPercent: a.containment,
+        matchedSpans: a.matches.map((m) => m.answer),
+      })),
       methodology:
-        "Word 8-gram containment between engine answers and source text; >=10% = COPIED, 2-9% = SUSPICIOUS.",
+        "Word 8-gram containment between user-collected engine answers and source text; >=10% = COPIED, 2-9% = SUSPICIOUS. Analysis performed locally in the creator's browser.",
     };
     const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `evidence-pack-${radarResult.domain}.json`;
+    a.download = `evidence-pack-${probeData.domain}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -438,17 +457,20 @@ export default function Home() {
         </>
       )}
 
-      {/* ── 09 · radar ── */}
+      {/* ── 09 · radar (manual probe mode) ── */}
       <section className="card verify-card">
         <h2>
-          <span className="num">09</span> RADAR — INTERROGATE ANSWER ENGINES ABOUT YOUR WORK
+          <span className="num">09</span> RADAR — CATCH ENGINES REPRODUCING YOUR WORK
         </h2>
         <div className="body">
           <p className="method-note" style={{ borderTop: "none", margin: "0 0 14px" }}>
-            Paste your article or give us its URL. We ask configured AI engines questions only your
-            content can answer, then diff their replies against your text with 8-gram plagiarism
-            forensics. A hit is evidence of reproduction — timestamped and hash-sealed.
+            Three steps, zero API keys, nothing sent anywhere by us: generate probe questions from
+            your article, ask the AI engines yourself, paste their answers back. The plagiarism
+            forensics run locally in your browser.
           </p>
+
+          {/* step 1 */}
+          <label className="draft-label">STEP 1 — YOUR ORIGINAL WORK</label>
           <div className="draft-row">
             <label className="draft-label grow">
               Article URL
@@ -472,64 +494,117 @@ export default function Home() {
           <button
             className="verify-btn"
             disabled={radarLoading || (!radarUrl.trim() && radarText.split(/\s+/).length < 80)}
-            onClick={handleRadar}
+            onClick={generateProbes}
           >
-            {radarLoading ? "Interrogating engines… (up to 60s)" : "Run radar →"}
+            {radarLoading ? "Generating probes…" : "Generate probe questions →"}
           </button>
           {radarError && <p className="error">⚠️ {radarError}</p>}
 
-          {radarResult && (
+          {probeData && (
+            <>
+              {/* step 2 */}
+              <label className="draft-label" style={{ marginTop: 20 }}>
+                STEP 2 — ASK THESE QUESTIONS, PASTE THE ANSWERS BACK
+              </label>
+              {probeData.probes.map((p, i) => (
+                <div key={i} className="card" style={{ marginTop: 8 }}>
+                  <h2>
+                    <span className="num">Q{i + 1}</span>
+                    <CopyButton text={p} />
+                  </h2>
+                  <div className="body">
+                    <pre>{p}</pre>
+                  </div>
+                </div>
+              ))}
+              <p className="method-note" style={{ borderTop: "none" }}>
+                Paste each question into ChatGPT / Perplexity / Claude / Gemini. If an engine has
+                your content in its index or training data, it will answer with suspiciously
+                familiar words.
+              </p>
+
+              <div className="draft-row" style={{ flexWrap: "wrap", gap: 12 }}>
+                {["ChatGPT", "Perplexity", "Claude", "Gemini"].map((engine) => (
+                  <label key={engine} className="draft-label grow" style={{ minWidth: 240 }}>
+                    {engine}’s answer (optional)
+                    <textarea
+                      onChange={(e) =>
+                        setEngineResponses((prev) => ({ ...prev, [engine]: e.target.value }))
+                      }
+                      placeholder={`Paste what ${engine} replied…`}
+                      rows={5}
+                      value={engineResponses[engine] ?? ""}
+                    />
+                  </label>
+                ))}
+              </div>
+              <button
+                className="verify-btn"
+                disabled={
+                  !Object.values(engineResponses).some((v) => v.trim()) || analyses !== null && !analyses.length
+                }
+                onClick={analyzeResponses}
+              >
+                Analyze pasted answers →
+              </button>
+            </>
+          )}
+
+          {/* step 3 — verdicts */}
+          {analyses && probeData && (
             <div style={{ marginTop: 20 }}>
+              <label className="draft-label">STEP 3 — VERDICT</label>
               <div className="score-row">
-                <div className={`score-big ${
-                  radarResult.results.some((r) => r.level === "COPIED")
-                    ? "score-bad"
-                    : radarResult.results.some((r) => r.level === "SUSPICIOUS")
-                      ? "score-mid"
-                      : "score-good"
-                }`}>
-                  {radarResult.results.filter((r) => r.status === "answered").length} /{" "}{
-                    radarResult.results.length + radarResult.unconfigured.length
-                  }
-                  <span className="score-sub">ENGINES PROBED</span>
+                <div
+                  className={`score-big ${
+                    analyses.some((a) => a.level === "COPIED")
+                      ? "score-bad"
+                      : analyses.some((a) => a.level === "SUSPICIOUS")
+                        ? "score-mid"
+                        : "score-good"
+                  }`}
+                >
+                  {analyses.length ? Math.max(...analyses.map((a) => a.containment)) : 0}%
+                  <span className="score-sub">MAX OVERLAP FOUND</span>
                 </div>
                 <ul className="breakdown">
-                  {radarResult.probes.map((p, i) => (
-                    <li key={i}>
-                      <span className="ua">probe {i + 1}: {p.slice(0, 70)}…</span>
+                  {analyses.length === 0 && (
+                    <li>
+                      <span>No answers were pasted.</span>
+                      <b>—</b>
+                    </li>
+                  )}
+                  {analyses.map((a) => (
+                    <li key={a.engine}>
+                      <span>
+                        <span className="led" style={{
+                          display: "inline-block",
+                          marginRight: 8,
+                          background:
+                            a.level === "COPIED" ? "var(--red)" :
+                            a.level === "SUSPICIOUS" ? "var(--orange)" : "var(--green)",
+                        }} />
+                        {a.engine}: {a.level.toLowerCase()}
+                      </span>
+                      <b>{a.containment}%</b>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {[...radarResult.results, ...radarResult.unconfigured].map((r) => (
-                <div key={r.engine} className="card" style={{ marginTop: 12 }}>
+              {analyses.filter((a) => a.matches.length).map((a) => (
+                <div key={a.engine} className="card" style={{ marginTop: 12 }}>
                   <h2>
-                    <span className="led" style={{
-                      background:
-                        r.level === "COPIED" ? "var(--red)" :
-                        r.level === "SUSPICIOUS" ? "var(--orange)" :
-                        r.status === "answered" ? "var(--green)" : "var(--muted)",
-                      boxShadow: r.level === "COPIED" || r.status === "error"
-                        ? `0 0 6px ${r.level === "COPIED" ? "rgba(224,49,49,.7)" : "transparent"}`
-                        : undefined,
-                    }} />
-                    {r.engine.toUpperCase()}
-                    <span className="muted-right">
-                      {r.status === "answered" && r.level != null && `${r.level} — ${r.containment}% overlap`}
-                      {r.status === "no-key" && "NO API KEY CONFIGURED"}
-                      {r.status === "error" && `ERROR: ${(r.error ?? "").slice(0, 40)}`}
-                    </span>
+                    MATCHED SPANS — {a.engine.toUpperCase()}
+                    <span className="muted-right">{a.level} · {a.containment}% overlap</span>
                   </h2>
-                  {r.matches && r.matches.length > 0 && (
-                    <div className="body">
-                      {r.matches.map((m, i) => (
-                        <blockquote key={i} className="match-quote">
-                          “{m.answer}”
-                        </blockquote>
-                      ))}
-                    </div>
-                  )}
+                  <div className="body">
+                    {a.matches.map((m, i) => (
+                      <blockquote key={i} className="match-quote">
+                        “{m.answer}”
+                      </blockquote>
+                    ))}
+                  </div>
                 </div>
               ))}
 
@@ -572,8 +647,63 @@ export default function Home() {
         </p>
       </section>
 
+      {/* ── research references ── */}
+      <section className="card refs-card">
+        <h2>
+          <span className="num">§§</span> RESEARCH REFERENCES
+        </h2>
+        <div className="body">
+          <ul className="ref-list">
+            <li>
+              Directive (EU) 2019/790 on Copyright in the Digital Single Market, Arts. 3–4 (TDM
+              exception &amp; opt-out) —{" "}
+              <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0790" target="_blank" rel="noreferrer noopener">eur-lex.europa.eu</a>
+            </li>
+            <li>
+              Regulation (EU) 2024/1689 (AI Act), Art. 53(1)(c)–(d): GPAI copyright policy &amp;
+              training-data summaries —{" "}
+              <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202401689" target="_blank" rel="noreferrer noopener">eur-lex.europa.eu</a>
+            </li>
+            <li>
+              U.S. Copyright Office, <i>Copyright and AI, Part 3: Generative AI Training</i> (May
+              2025) —{" "}
+              <a href="https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-3-Generative-AI-Training-Report-Pre-Publication-Version.pdf" target="_blank" rel="noreferrer noopener">copyright.gov/ai</a>
+            </li>
+            <li>
+              Glaze: protecting artists from style mimicry —{" "}
+              <a href="https://glaze.cs.uchicago.edu/" target="_blank" rel="noreferrer noopener">glaze.cs.uchicago.edu</a>{" "}
+              · Nightshade: data poisoning deterrent —{" "}
+              <a href="https://nightshade.cs.uchicago.edu/" target="_blank" rel="noreferrer noopener">nightshade.cs.uchicago.edu</a>
+            </li>
+            <li>
+              IETF AI Preferences (aipref) Working Group charter —{" "}
+              <a href="https://datatracker.ietf.org/doc/charter-ietf-aipref/" target="_blank" rel="noreferrer noopener">datatracker.ietf.org</a>
+            </li>
+            <li>
+              C2PA Content Credentials provenance standard —{" "}
+              <a href="https://c2pa.org/" target="_blank" rel="noreferrer noopener">c2pa.org</a>
+            </li>
+            <li>
+              Carlini et al., <i>Stealing Part of a Production Language Model</i> (2024):
+              canary-based training-membership detection —{" "}
+              <a href="https://arxiv.org/abs/2403.06634" target="_blank" rel="noreferrer noopener">arxiv.org/abs/2403.06634</a>
+            </li>
+            <li>
+              Spawning AI: Have I Been Trained? / DO NOT TRAIN registry —{" "}
+              <a href="https://spawning.ai/" target="_blank" rel="noreferrer noopener">spawning.ai</a>
+            </li>
+          </ul>
+          <p className="method-note" style={{ borderTop: "none", marginBottom: 0 }}>
+            Full analysis with findings and limitations:{" "}
+            <a href="https://github.com/zeecares/4allhuman/blob/main/research/protecting-human-content-from-ai-training.md" target="_blank" rel="noreferrer noopener">
+              /research/protecting-human-content-from-ai-training.md
+            </a>
+          </p>
+        </div>
+      </section>
+
       <footer>
-        Open source · nothing stored · methodology and research notes in{" "}
+        Open source · nothing stored · no API keys · methodology and research notes in{" "}
         <a href="https://github.com/zeecares/4allhuman" target="_blank" rel="noreferrer noopener">
           github.com/zeecares/4allhuman
         </a>
