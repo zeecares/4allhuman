@@ -15,7 +15,9 @@ Paste your domain → get a protection score → receive ready-to-deploy opt-out
 - **EU AI Act Art. 53(1)(c):** GPAI providers *must* identify and comply with those reservations — honoring this output is a regulatory obligation for them.
 - **US:** no opt-out statute; fair use is uncertain (USCO Part 3 report). Blocking crawlers + keeping content behind access control is currently the strongest lever.
 
-Full research notes: [`research/protecting-human-content-from-ai-training.md`](./research/protecting-human-content-from-ai-training.md)
+Research notes:
+- [`research/protecting-human-content-from-ai-training.md`](./research/protecting-human-content-from-ai-training.md) — legal & technical landscape (EU DSM Art. 4(3), AI Act Art. 53(1)(c), USCO Part 3, Glaze/Nightshade, IETF aipref, C2PA)
+- [`research/enhancement-research.md`](./research/enhancement-research.md) — verified build opportunities: Common Crawl CDX corpus check, DE-COP memorization detection, RSL licensing standard, x402 payments
 
 ## What this can and cannot guarantee
 
@@ -96,6 +98,19 @@ co-occurrence is effectively zero.
 | 10 | RSL License | `/license.xml` in RSL 1.0 schema — machine-readable licensing for the AI-first web |
 | 11 | Radar | Manual probe mode: generate questions → ask engines yourself → local 8-gram forensics; plus **DE-COP memorization quiz** (arXiv 2402.09910) scoring verbatim-recognition against the 25% chance line |
 | §§ | Honesty layer | What this can and cannot do |
+
+## Key references
+
+- Directive (EU) 2019/790 Arts. 3–4 (TDM opt-out) — [EUR-Lex](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0790)
+- Regulation (EU) 2024/1689 (AI Act) Art. 53(1)(c)–(d) — [EUR-Lex](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202401689)
+- U.S. Copyright Office, *Copyright and AI Part 3: Generative AI Training* (2025) — [copyright.gov/ai](https://www.copyright.gov/ai/)
+- DE-COP: detecting copyrighted content in training data — [arXiv 2402.09910](https://arxiv.org/abs/2402.09910)
+- Beyond Public Access in LLM Pre-Training Data — [arXiv 2505.00020](https://arxiv.org/abs/2505.00020)
+- Stealing Part of a Production Language Model (canary extraction) — [arXiv 2403.06634](https://arxiv.org/abs/2403.06634)
+- RSL 1.0 Really Simple Licensing — [rslstandard.org](https://rslstandard.org/) · [RSL Collective](https://rslcollective.org/)
+- IETF AI Preferences WG — [datatracker](https://datatracker.ietf.org/wg/aipref/) · C2PA — [c2pa.org](https://c2pa.org/)
+- Glaze / Nightshade — [UChicago SAND Lab](https://glaze.cs.uchicago.edu/) · Spawning DO NOT TRAIN — [spawning.ai](https://spawning.ai/)
+- Common Crawl corpus & index API — [commoncrawl.org](https://commoncrawl.org/)
 
 ## Roadmap (see TASKS.md)
 

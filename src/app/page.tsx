@@ -905,6 +905,24 @@ export default function Home() {
               <a href="https://arxiv.org/abs/2403.06634" target="_blank" rel="noreferrer noopener">arxiv.org/abs/2403.06634</a>
             </li>
             <li>
+              DE-COP: Detecting Copyrighted Content in Language Models Training Data —{" "}
+              <a href="https://arxiv.org/abs/2402.09910" target="_blank" rel="noreferrer noopener">arxiv.org/abs/2402.09910</a>
+            </li>
+            <li>
+              Beyond Public Access in LLM Pre-Training Data (O'Reilly DE-COP study on GPT-4o) —{" "}
+              <a href="https://arxiv.org/abs/2505.00020" target="_blank" rel="noreferrer noopener">arxiv.org/abs/2505.00020</a>
+            </li>
+            <li>
+              Common Crawl — open web corpus &amp; CDX index API used by our corpus check —{" "}
+              <a href="https://commoncrawl.org/" target="_blank" rel="noreferrer noopener">commoncrawl.org</a>
+            </li>
+            <li>
+              RSL 1.0 — Really Simple Licensing standard &amp; Collective —{" "}
+              <a href="https://rslstandard.org/" target="_blank" rel="noreferrer noopener">rslstandard.org</a>{" "}
+              ·{" "}
+              <a href="https://rslcollective.org/" target="_blank" rel="noreferrer noopener">rslcollective.org</a>
+            </li>
+            <li>
               Spawning AI: Have I Been Trained? / DO NOT TRAIN registry —{" "}
               <a href="https://spawning.ai/" target="_blank" rel="noreferrer noopener">spawning.ai</a>
             </li>
