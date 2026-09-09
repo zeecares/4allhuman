@@ -1,39 +1,16 @@
 /**
- * Known AI training crawlers and the companies behind them.
- * Sources: each provider's official crawler documentation (OpenAI GPTBot docs,
- * Google's crawler overview re Google-Extended, Anthropic ClaudeBot docs,
- * Common Crawl CCBot, ByteDance Bytespider, PerplexityBot, Amazonbot, etc.)
+ * Known AI crawlers and the companies behind them.
+ *
+ * The blocklist itself now lives in crawlers.generated.ts and is regenerated
+ * from the community ai.robots.txt dataset (https://github.com/ai-robots-txt/ai.robots.txt)
+ * with `npm run update:crawlers`. The original 19 hand-researched entries are
+ * preserved as the curated core of that file, and the dualUse distinction
+ * (training vs search/retrieval/user-initiated fetching) is extended across
+ * the full community dataset.
  */
 
-export type AICrawler = {
-  userAgent: string;
-  operator: string;
-  purpose: string;
-  /** true if this crawler also powers a search/discovery product users may want to keep */
-  dualUse?: boolean;
-};
-
-export const AI_CRAWLERS: AICrawler[] = [
-  { userAgent: "GPTBot", operator: "OpenAI", purpose: "LLM training data collection" },
-  { userAgent: "OAI-SearchBot", operator: "OpenAI", purpose: "ChatGPT Search index", dualUse: true },
-  { userAgent: "ChatGPT-User", operator: "OpenAI", purpose: "Real-time user-initiated fetching", dualUse: true },
-  { userAgent: "Google-Extended", operator: "Google", purpose: "Gemini / Vertex AI training", dualUse: true },
-  { userAgent: "ClaudeBot", operator: "Anthropic", purpose: "LLM training data collection" },
-  { userAgent: "Claude-Web", operator: "Anthropic", purpose: "Legacy web fetch" },
-  { userAgent: "anthropic-ai", operator: "Anthropic", purpose: "AI assistant fetching" },
-  { userAgent: "CCBot", operator: "Common Crawl", purpose: "Open dataset used by many model trainers" },
-  { userAgent: "Bytespider", operator: "ByteDance", purpose: "TikTok / Doubao LLM training" },
-  { userAgent: "PerplexityBot", operator: "Perplexity", purpose: "Answer engine index + training", dualUse: true },
-  { userAgent: "Amazonbot", operator: "Amazon", purpose: "Alexa / Nova training", dualUse: true },
-  { userAgent: "Applebot-Extended", operator: "Apple", purpose: "Apple Intelligence training (opt-in for Siri search kept via Applebot)", dualUse: true },
-  { userAgent: "Meta-ExternalAgent", operator: "Meta", purpose: "LLaMA training data collection" },
-  { userAgent: "YouBot", operator: "You.com", purpose: "Answer engine index + training", dualUse: true },
-  { userAgent: "Diffbot", operator: "Diffbot", purpose: "Knowledge-graph / dataset extraction" },
-  { userAgent: "Cotoyogi", operator: "NII (Japan)", purpose: "Research LLM corpus" },
-  { userAgent: "Timpibot", operator: "Timpi", purpose: "Web-scale dataset" },
-  { userAgent: "iaskspider", operator: "iAsk.AI", purpose: "LLM training data collection" },
-  { userAgent: "ImagesiftBot", operator: "Hive", purpose: "Image dataset collection" },
-];
+export { AI_CRAWLERS } from "./crawlers.generated";
+export type { AICrawler } from "./crawlers.generated";
 
 /**
  * Legal basis strings embedded into generated artifacts.
