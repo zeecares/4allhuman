@@ -2,11 +2,12 @@
  * Generator: produces all deployable opt-out artifacts from a scan result.
  * 1. robots.txt block snippet for known AI crawlers
  * 2. ai.txt (Spawning-style machine-readable permissions file)
- * 3. HTML <meta> tags
+ * 3. HTML <meta> tags (noai/noimageai + W3C TDMRep reservation)
  * 4. EU DSM Art. 4(3) reservation statement (legal notice)
  */
 import { AI_CRAWLERS, LEGAL } from "./crawlers";
 import type { ScanResult } from "./scanner";
+import { scoreFromLayers } from "./layers";
 
 export type GeneratedArtifacts = {
   robotsSnippet: string;
@@ -47,7 +48,12 @@ export function generateAiTxt(domain: string): string {
 }
 
 export function generateMetaTags(): string {
-  return `<meta name="robots" content="noai, noimageai">`;
+  // noai/noimageai = page-level AI opt-out; tdm-reservation = W3C TDMRep,
+  // the machine-readable EU DSM Art. 4(3) rights reservation.
+  return [
+    `<meta name="robots" content="noai, noimageai">`,
+    `<meta name="tdm-reservation" content="1">`,
+  ].join("\n");
 }
 
 export function generateLegalNotice(domain: string): string {
@@ -98,41 +104,12 @@ export function generateAllArtifacts(scan: ScanResult): GeneratedArtifacts {
 }
 
 /**
- * Protection score inputs — decoupled from ScanResult so /api/verify
- * can score user-pasted robots.txt content identically.
+ * Protection score — a sum over the multi-layer audit (src/lib/layers.ts).
+ * Weights: robots.txt 40, X-Robots-Tag 15, meta noai 15, TDMRep 10,
+ * ai.txt 10, aipref 5, reachable 5 (llms.txt is informational, 0).
+ * Decoupled from ScanResult so /api/verify can score user-pasted
+ * artifacts with the exact same layer builders.
  */
-export type ScoreInput = {
-  blockedCount: number;
-  totalCrawlers: number;
-  hasNoaiMeta: boolean;
-  aiTxtFound: boolean;
-  reachable: boolean;
-};
-
-export function computeScore(input: ScoreInput): {
-  score: number;
-  breakdown: { label: string; got: number; max: number }[];
-} {
-  const crawlerCoverage = input.totalCrawlers > 0 ? input.blockedCount / input.totalCrawlers : 0;
-  const breakdown = [
-    { label: "AI crawlers blocked in robots.txt", got: Math.round(crawlerCoverage * 50), max: 50 },
-    { label: "noai/noimageai meta tags", got: input.hasNoaiMeta ? 20 : 0, max: 20 },
-    { label: "ai.txt published", got: input.aiTxtFound ? 15 : 0, max: 15 },
-    { label: "Site reachable for verification", got: input.reachable ? 15 : 0, max: 15 },
-  ];
-  return {
-    score: breakdown.reduce((s, b) => s + b.got, 0),
-    breakdown,
-  };
-}
-
-export function scoreFromScan(scan: ScanResult, totalCrawlers: number) {
-  return computeScore({
-    blockedCount: scan.blockedCrawlers.length,
-    totalCrawlers,
-    hasNoaiMeta:
-      scan.metaTagsFound.includes("noai") || scan.metaTagsFound.includes("noimageai"),
-    aiTxtFound: scan.aiTxtFound,
-    reachable: scan.reachable,
-  });
+export function scoreFromScan(scan: ScanResult) {
+  return scoreFromLayers(scan.layers);
 }
