@@ -14,14 +14,15 @@ import {
 } from "@/lib/timeline";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 /**
- * Leave room inside `maxDuration` to serialise whatever the search has found.
+ * Vercel's Hobby plan caps functions at 60s (maxDuration above), so the budget
+ * must leave room inside it to serialise whatever the search has found.
  * The Internet Archive answers a CDX query in anywhere from 3s to 30s, so the
  * budget buys a useful number of probes without ever hanging the request.
  */
-const SEARCH_BUDGET_MS = 90_000;
+const SEARCH_BUDGET_MS = 45_000;
 const ARCHIVE_TIMEOUT_MS = 30_000;
 
 const CDX = "https://web.archive.org/cdx/search/cdx";
@@ -144,3 +145,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
