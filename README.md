@@ -53,6 +53,32 @@ Visual language follows Teenage Engineering's industrial design: flat panels, ha
 warm-grey chassis, signature orange accents, monospace labels, LED status indicators,
 numbered modules — instruments, not marketing.
 
+## CLI
+
+Run the same audit from your terminal or CI - no config, zero dependencies:
+
+```bash
+npx 4allhuman audit example.com
+```
+
+```
+npx 4allhuman audit example.com [--json] [--fail-below <0-100>] [--timeout <ms>]
+
+  --json                Machine-readable report (all layers, verdicts, score).
+  --fail-below <0-100>  Exit 1 when the score is below this threshold (CI gate).
+  --timeout <ms>        Per-request timeout (default 8000).
+```
+
+The report prints one plain-language verdict per layer (PROTECTED / PARTIAL /
+MISSING / NOTE) with the evidence behind it, then the total score out of 100.
+
+Exit codes: `0` audit ran and meets `--fail-below` (if given) · `1` score below
+`--fail-below` · `2` usage error or the site could not be reached.
+
+Runs directly from TypeScript via Node's type stripping - requires Node >= 22.18.
+The CLI and the web app share the exact same audit engine (`src/lib/scanner.ts` +
+`src/lib/layers.ts`), so a terminal score always matches a web score.
+
 ## Run it
 
 ```bash
@@ -66,7 +92,10 @@ npm run typecheck      # tsc --strict, no emit
 ## Architecture
 
 ```
+bin/
+└── 4allhuman.ts          # CLI entry point (shebang, zero deps, Node >= 22.18)
 src/
+├── cli.ts                # CLI core: arg parsing, report rendering, exit codes
 ├── app/
 │   ├── page.tsx              # scan UI + artifact viewer with copy buttons
 │   └── api/protect/route.ts  # orchestrator: scan → generate → score
@@ -146,4 +175,5 @@ before/after score is computed identically to a live scan.
 - [ ] One-click deploy: open a PR to the site's repo / upload via FTP
 - [ ] C2PA "Proof of Human" content signing
 - [ ] Spawning DO NOT TRAIN registry submission
+
 
