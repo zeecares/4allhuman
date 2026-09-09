@@ -9,8 +9,8 @@
  * the full community dataset.
  */
 
-export { AI_CRAWLERS } from "./crawlers.generated";
-export type { AICrawler } from "./crawlers.generated";
+export { AI_CRAWLERS } from "./crawlers.generated.ts";
+export type { AICrawler } from "./crawlers.generated.ts";
 
 /**
  * Legal basis strings embedded into generated artifacts.
@@ -31,3 +31,4 @@ export const LEGAL = {
     "disregards these directives may constitute copyright infringement and/or breach\n" +
     "of these terms.",
 };
+

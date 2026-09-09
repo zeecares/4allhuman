@@ -9,8 +9,8 @@
  * - aipref (IETF draft vocabulary) signals where detectable
  * Pure Node fetch, zero deps.
  */
-import { AI_CRAWLERS } from "./crawlers";
-import { explain, parseRobots } from "./robots9309";
+import { AI_CRAWLERS } from "./crawlers.ts";
+import { explain, parseRobots } from "./robots9309.ts";
 import {
   aiPrefLayer,
   aiTxtLayer,
@@ -25,7 +25,7 @@ import {
   extractMetaTags,
   type LayerResult,
   type TdmSignals,
-} from "./layers";
+} from "./layers.ts";
 
 // Meta extraction moved to layers.ts; re-export for existing callers.
 export { extractMetaTags };
@@ -73,12 +73,14 @@ type FetchedPage = {
   tdmPolicy: string[];
 };
 
-async function fetchText(url: string, timeoutMs = 8000): Promise<string | null> {
+const DEFAULT_TIMEOUT_MS = 8000;
+
+async function fetchText(url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<string | null> {
   const page = await fetchPage(url, timeoutMs);
   return page.text;
 }
 
-async function fetchPage(url: string, timeoutMs = 8000): Promise<FetchedPage> {
+async function fetchPage(url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<FetchedPage> {
   const empty: FetchedPage = { text: null, xRobotsTag: [], tdmReservation: [], tdmPolicy: [] };
   try {
     const res = await fetch(url, {
@@ -122,7 +124,13 @@ export function evaluateCrawlers(robotsTxt: string): CrawlerVerdict[] {
   });
 }
 
-export async function scanSite(rawUrl: string): Promise<ScanResult> {
+export type ScanOptions = {
+  /** Per-request timeout in milliseconds (robots.txt, homepage, ai.txt, llms.txt). */
+  timeoutMs?: number;
+};
+
+export async function scanSite(rawUrl: string, options: ScanOptions = {}): Promise<ScanResult> {
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   let base: URL;
   try {
     base = normalizeUrl(rawUrl);
@@ -132,10 +140,10 @@ export async function scanSite(rawUrl: string): Promise<ScanResult> {
 
   const origin = base.origin;
   const [robotsTxt, homepage, aiTxt, llmsTxt] = await Promise.all([
-    fetchText(`${origin}/robots.txt`),
-    fetchPage(base.toString()),
-    fetchText(`${origin}/ai.txt`),
-    fetchText(`${origin}/llms.txt`),
+    fetchText(`${origin}/robots.txt`, timeoutMs),
+    fetchPage(base.toString(), timeoutMs),
+    fetchText(`${origin}/ai.txt`, timeoutMs),
+    fetchText(`${origin}/llms.txt`, timeoutMs),
   ]);
 
   const verdicts = robotsTxt ? evaluateCrawlers(robotsTxt) : [];
@@ -185,3 +193,4 @@ export async function scanSite(rawUrl: string): Promise<ScanResult> {
     scannedAt: new Date().toISOString(),
   };
 }
+
