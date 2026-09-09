@@ -154,6 +154,7 @@ before/after score is computed identically to a live scan.
 | 05–09 | The Fix | robots.txt (+ EU Art. 4(3) reservation + RSL `License:` line), verify-your-fix, ai.txt, meta tags, legal notice |
 | 10 | RSL License | `/license.xml` in RSL 1.0 schema — machine-readable licensing for the AI-first web |
 | 11 | Radar | Manual probe mode: generate questions → ask engines yourself → local 8-gram forensics; plus **DE-COP memorization quiz** (arXiv 2402.09910) scoring verbatim-recognition against the 25% chance line |
+| 12 | Claim window | Dates the site's rights reservation by bisecting its archived robots.txt at the Internet Archive, then sorts published Common Crawl windows into before/after that date — with both boundary permalinks and a downloadable plain-text record |
 | §§ | Honesty layer | What this can and cannot do |
 
 ## Key references
@@ -168,6 +169,7 @@ before/after score is computed identically to a live scan.
 - IETF AI Preferences WG — [datatracker](https://datatracker.ietf.org/wg/aipref/) · C2PA — [c2pa.org](https://c2pa.org/)
 - Glaze / Nightshade — [UChicago SAND Lab](https://glaze.cs.uchicago.edu/) · Spawning DO NOT TRAIN — [spawning.ai](https://spawning.ai/)
 - Common Crawl corpus & index API — [commoncrawl.org](https://commoncrawl.org/)
+- Internet Archive CDX server (archived robots.txt history) — [Wayback CDX API](https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server)
 
 ## Roadmap (see TASKS.md)
 
