@@ -15,6 +15,7 @@ type ScanResponse = {
     robotsFound: boolean;
     blockedCrawlers: string[];
     openCrawlers: string[];
+    verdicts: { userAgent: string; allowed: boolean; reason: string }[];
     metaTagsFound: string[];
     aiTxtFound: boolean;
     scannedAt: string;
@@ -382,8 +383,13 @@ export default function Home() {
             <div className="body crawler-grid">
               {[...result.scan.blockedCrawlers, ...result.scan.openCrawlers].map((ua) => {
                 const blocked = result.scan.blockedCrawlers.includes(ua);
+                const reason = result.scan.verdicts?.find((v) => v.userAgent === ua)?.reason;
                 return (
-                  <div key={ua} className={`chip ${blocked ? "blocked" : "open"}`}>
+                  <div
+                    key={ua}
+                    className={`chip ${blocked ? "blocked" : "open"}`}
+                    title={reason}
+                  >
                     <span className="led" />
                     <span className="ua">{ua}</span>
                     <span className="state">{blocked ? "BLOCKED" : "CAN TRAIN"}</span>
@@ -393,8 +399,9 @@ export default function Home() {
             </div>
             <p className="method-note">
               Read directly from this site&apos;s live robots.txt at scan time — follow the link above
-              to check it yourself. Green means a group disallowing all paths was found for that
-              user-agent.
+              to check it yourself. Verdicts use full RFC 9309 matching: most specific user-agent
+              group, longest-match rules, allow-wins ties, and * / $ wildcards. Hover any crawler
+              to see the exact rule and line that decided it.
             </p>
           </section>
 
@@ -944,5 +951,4 @@ export default function Home() {
       </footer>
     </main>
   );
-}
-
+              }
