@@ -1,12 +1,34 @@
 /**
  * Scanner: inspects a live site's current AI-training protection posture.
- * - fetches /robots.txt and evaluates it with the RFC 9309 matcher
- *   (src/lib/robots9309.ts) for every known AI crawler
- * - fetches the homepage HTML and looks for noai/noimageai meta tags
+ * Multi-layer audit (src/lib/layers.ts):
+ * - robots.txt evaluated with the RFC 9309 matcher for every known AI crawler
+ * - X-Robots-Tag HTTP headers (noai / noimageai / none, global and per-bot)
+ * - noai/noimageai meta tags on the homepage
+ * - TDMRep (W3C tdm-reservation / tdm-policy, header and meta forms)
+ * - /ai.txt (Spawning proposal) and /llms.txt (allow-side counterpart)
+ * - aipref (IETF draft vocabulary) signals where detectable
  * Pure Node fetch, zero deps.
  */
 import { AI_CRAWLERS } from "./crawlers";
 import { explain, parseRobots } from "./robots9309";
+import {
+  aiPrefLayer,
+  aiTxtLayer,
+  detectAiPref,
+  detectTdmRep,
+  headersLayer,
+  llmsTxtLayer,
+  metaLayer,
+  reachableLayer,
+  robotsLayer,
+  tdmRepLayer,
+  extractMetaTags,
+  type LayerResult,
+  type TdmSignals,
+} from "./layers";
+
+// Meta extraction moved to layers.ts; re-export for existing callers.
+export { extractMetaTags };
 
 export type CrawlerVerdict = {
   userAgent: string;
@@ -26,6 +48,15 @@ export type ScanResult = {
   verdicts: CrawlerVerdict[];
   metaTagsFound: string[]; // e.g. ["noai", "noimageai"]
   aiTxtFound: boolean;
+  /** Raw X-Robots-Tag header values from the homepage response. */
+  xRobotsTagHeaders: string[];
+  /** TDMRep signals detected in headers or HTML. */
+  tdm: TdmSignals;
+  llmsTxtFound: boolean;
+  /** aipref (IETF draft) preference tokens detected in headers/HTML. */
+  aiPrefSignals: string[];
+  /** The layered audit: one verdict per opt-out standard, plain language. */
+  layers: LayerResult[];
   scannedAt: string;
 };
 
@@ -34,17 +65,42 @@ function normalizeUrl(input: string): URL {
   return new URL(withScheme);
 }
 
+type FetchedPage = {
+  text: string | null;
+  /** All X-Robots-Tag header values (a response can carry several). */
+  xRobotsTag: string[];
+  tdmReservation: string[];
+  tdmPolicy: string[];
+};
+
 async function fetchText(url: string, timeoutMs = 8000): Promise<string | null> {
+  const page = await fetchPage(url, timeoutMs);
+  return page.text;
+}
+
+async function fetchPage(url: string, timeoutMs = 8000): Promise<FetchedPage> {
+  const empty: FetchedPage = { text: null, xRobotsTag: [], tdmReservation: [], tdmPolicy: [] };
   try {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(timeoutMs),
       headers: { "User-Agent": "DontTrainOnMe-Scanner/0.1 (hackathon project)" },
       redirect: "follow",
     });
-    if (!res.ok) return null;
-    return await res.text();
+    if (!res.ok) return empty;
+    // getSettled()/getAll aren't universal; headers.forEach yields one entry
+    // per distinct field, with repeats already comma-joined by the spec.
+    const collect = (name: string): string[] => {
+      const v = res.headers.get(name);
+      return v ? [v] : [];
+    };
+    return {
+      text: await res.text(),
+      xRobotsTag: collect("x-robots-tag"),
+      tdmReservation: collect("tdm-reservation"),
+      tdmPolicy: collect("tdm-policy"),
+    };
   } catch {
-    return null;
+    return empty;
   }
 }
 
@@ -66,19 +122,6 @@ export function evaluateCrawlers(robotsTxt: string): CrawlerVerdict[] {
   });
 }
 
-export function extractMetaTags(html: string): string[] {
-  const found: string[] = [];
-  const metaRe = /<meta\s+[^>]*>/gi;
-  for (const tag of html.match(metaRe) ?? []) {
-    if (/name\s*=\s*["']robots["']/i.test(tag)) {
-      for (const directive of ["noai", "noimageai", "notranslate"]) {
-        if (new RegExp(`\\b${directive}\\b`, "i").test(tag)) found.push(directive);
-      }
-    }
-  }
-  return [...new Set(found)];
-}
-
 export async function scanSite(rawUrl: string): Promise<ScanResult> {
   let base: URL;
   try {
@@ -88,10 +131,11 @@ export async function scanSite(rawUrl: string): Promise<ScanResult> {
   }
 
   const origin = base.origin;
-  const [robotsTxt, homepage, aiTxt] = await Promise.all([
+  const [robotsTxt, homepage, aiTxt, llmsTxt] = await Promise.all([
     fetchText(`${origin}/robots.txt`),
-    fetchText(base.toString()),
+    fetchPage(base.toString()),
     fetchText(`${origin}/ai.txt`),
+    fetchText(`${origin}/llms.txt`),
   ]);
 
   const verdicts = robotsTxt ? evaluateCrawlers(robotsTxt) : [];
@@ -100,16 +144,44 @@ export async function scanSite(rawUrl: string): Promise<ScanResult> {
     ? verdicts.filter((v) => v.allowed).map((v) => v.userAgent)
     : AI_CRAWLERS.map((c) => c.userAgent);
 
+  const metaTagsFound = homepage.text ? extractMetaTags(homepage.text) : [];
+  const tdm = detectTdmRep({
+    headerValues: homepage.tdmReservation,
+    policyHeaderValues: homepage.tdmPolicy,
+    html: homepage.text,
+  });
+  const aiPrefSignals = detectAiPref([...homepage.xRobotsTag, homepage.text]);
+  const reachable = !!(robotsTxt || homepage.text);
+
+  const layers: LayerResult[] = [
+    robotsLayer({
+      blockedCount: blockedCrawlers.length,
+      totalCrawlers: AI_CRAWLERS.length,
+      robotsFound: !!robotsTxt,
+    }),
+    headersLayer(homepage.xRobotsTag),
+    metaLayer(metaTagsFound),
+    tdmRepLayer(tdm),
+    aiTxtLayer(!!aiTxt, aiTxt),
+    llmsTxtLayer(!!llmsTxt),
+    aiPrefLayer(aiPrefSignals),
+    reachableLayer(reachable),
+  ];
+
   return {
     url: origin,
-    reachable: !!(robotsTxt || homepage),
+    reachable,
     robotsFound: !!robotsTxt,
     blockedCrawlers,
     openCrawlers,
     verdicts,
-    metaTagsFound: homepage ? extractMetaTags(homepage) : [],
+    metaTagsFound,
     aiTxtFound: !!aiTxt,
+    xRobotsTagHeaders: homepage.xRobotsTag,
+    tdm,
+    llmsTxtFound: !!llmsTxt,
+    aiPrefSignals,
+    layers,
     scannedAt: new Date().toISOString(),
   };
 }
-
