@@ -1,15 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { evaluateCrawlers } from "@/lib/scanner";
+import { evaluateCrawlers, extractMetaTags } from "@/lib/scanner";
 import { AI_CRAWLERS } from "@/lib/crawlers";
-import { computeScore } from "@/lib/generator";
+import {
+  aiPrefLayer,
+  aiTxtLayer,
+  detectAiPref,
+  detectTdmRep,
+  headersLayer,
+  metaLayer,
+  reachableLayer,
+  robotsLayer,
+  scoreFromLayers,
+  tdmRepLayer,
+} from "@/lib/layers";
 
 export const runtime = "nodejs";
 
 /**
  * POST /api/verify
- * Body: { robotsTxt?: string, aiTxt?: string, metaHtml?: string }
- * Scores user-pasted artifact contents (no live fetch) so creators can
- * confirm their fix before deploying it.
+ * Body: {
+ *   robotsTxt?: string,
+ *   aiTxt?: string,
+ *   metaHtml?: string,
+ *   xRobotsTag?: string | string[]  // planned X-Robots-Tag header value(s)
+ * }
+ * Scores user-pasted artifact contents (no live fetch) with the SAME layer
+ * builders the live scanner uses, so creators can confirm their fix before
+ * deploying it. Pasted content is definitionally "deployed" for scoring.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -17,11 +34,12 @@ export async function POST(req: NextRequest) {
       robotsTxt?: string;
       aiTxt?: string;
       metaHtml?: string;
+      xRobotsTag?: string | string[];
     };
 
-    if (!body.robotsTxt && !body.aiTxt && !body.metaHtml) {
+    if (!body.robotsTxt && !body.aiTxt && !body.metaHtml && !body.xRobotsTag) {
       return NextResponse.json(
-        { error: "Provide at least one of robotsTxt, aiTxt, metaHtml" },
+        { error: "Provide at least one of robotsTxt, aiTxt, metaHtml, xRobotsTag" },
         { status: 400 },
       );
     }
@@ -34,25 +52,36 @@ export async function POST(req: NextRequest) {
         .map((v) => v.userAgent);
     }
 
-    const aiTxtFound =
-      !!body.aiTxt &&
-      /deny[- ](training|dataset)|permission:\s*deny/i.test(body.aiTxt);
-
-    const hasNoaiMeta =
-      !!body.metaHtml &&
-      /<meta\s+[^>]*name\s*=\s*["']robots["'][^>]*>/i.test(body.metaHtml) &&
-      /\bnoai\b|\bnoimageai\b/i.test(body.metaHtml);
-
-    const score = computeScore({
-      blockedCount: blocked.length,
-      totalCrawlers: AI_CRAWLERS.length,
-      hasNoaiMeta,
-      aiTxtFound,
-      reachable: true, // pasted content is definitionally "deployed" for scoring
+    const headerValues = Array.isArray(body.xRobotsTag)
+      ? body.xRobotsTag
+      : body.xRobotsTag
+        ? [body.xRobotsTag]
+        : [];
+    const metaTagsFound = body.metaHtml ? extractMetaTags(body.metaHtml) : [];
+    const tdm = detectTdmRep({
+      headerValues: headerValues.filter((v) => /^\s*1\s*$/.test(v)),
+      html: body.metaHtml,
     });
+    const aiPrefSignals = detectAiPref([...headerValues, body.metaHtml ?? null]);
+
+    const layers = [
+      robotsLayer({
+        blockedCount: blocked.length,
+        totalCrawlers: AI_CRAWLERS.length,
+        robotsFound: !!body.robotsTxt,
+      }),
+      headersLayer(headerValues),
+      metaLayer(metaTagsFound),
+      tdmRepLayer(tdm),
+      aiTxtLayer(!!body.aiTxt, body.aiTxt ?? null),
+      aiPrefLayer(aiPrefSignals),
+      reachableLayer(true), // pasted content is definitionally "deployed"
+    ];
+    const score = scoreFromLayers(layers);
 
     return NextResponse.json({
       score,
+      layers,
       blockedCrawlers: blocked,
       openCrawlers: AI_CRAWLERS.filter((c) => !blocked.includes(c.userAgent)).map(
         (c) => c.userAgent,
