@@ -841,7 +841,7 @@ export default function Home() {
           <div>
             <h3>✓ Can</h3>
             <ul>
-              <li>Measure exposure against 19 documented AI training crawlers</li>
+              <li>Measure exposure against 170+ documented AI crawlers (community ai.robots.txt list)</li>
               <li>Publish legally meaningful opt-outs (EU DSM Art. 4(3))</li>
               <li>Create obligations for GPAI providers under EU AI Act Art. 53(1)(c)</li>
               <li>Verify your deployed configuration, with evidence links</li>
@@ -945,3 +945,4 @@ export default function Home() {
     </main>
   );
 }
+
