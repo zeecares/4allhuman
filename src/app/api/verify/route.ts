@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseRobotsForUA } from "@/lib/scanner";
+import { evaluateCrawlers } from "@/lib/scanner";
 import { AI_CRAWLERS } from "@/lib/crawlers";
 import { computeScore } from "@/lib/generator";
 
@@ -28,10 +28,10 @@ export async function POST(req: NextRequest) {
 
     let blocked: string[] = [];
     if (body.robotsTxt) {
-      const map = parseRobotsForUA(body.robotsTxt);
-      blocked = AI_CRAWLERS.filter(
-        (c) => map.get(c.userAgent.toLowerCase()) ?? false,
-      ).map((c) => c.userAgent);
+      // Same RFC 9309 evaluation the live scanner uses.
+      blocked = evaluateCrawlers(body.robotsTxt)
+        .filter((v) => !v.allowed)
+        .map((v) => v.userAgent);
     }
 
     const aiTxtFound =
