@@ -4,7 +4,7 @@
 
 Paste your domain → get a protection score → receive ready-to-deploy opt-out artifacts:
 
-1. **robots.txt** section blocking 19 known AI training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot, Bytespider…) — doubling as a machine-readable **EU DSM Directive Art. 4(3)** rights reservation
+1. **robots.txt** section blocking 170+ known AI crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot, Bytespider…) — doubling as a machine-readable **EU DSM Directive Art. 4(3)** rights reservation
 2. **/ai.txt** — Spawning-spec machine-readable access policy
 3. **`<meta name="robots" content="noai, noimageai">`** tags for every page head
 4. **Legal notice** of reserved rights
@@ -58,6 +58,7 @@ numbered modules — instruments, not marketing.
 ```bash
 npm install
 npm run dev        # http://localhost:3000
+npm run update:crawlers   # refresh the crawler blocklist from the ai.robots.txt community dataset
 ```
 
 ## Architecture
@@ -68,7 +69,8 @@ src/
 │   ├── page.tsx              # scan UI + artifact viewer with copy buttons
 │   └── api/protect/route.ts  # orchestrator: scan → generate → score
 └── lib/
-    ├── crawlers.ts           # blocklist of 19 AI training crawlers + legal text
+    ├── crawlers.ts           # re-exports the crawler blocklist + legal text
+    │   ├── crawlers.generated.ts  # 170+ crawlers, generated from the community ai.robots.txt dataset
     ├── scanner.ts            # live robots.txt parser (RFC 9309 groups) + meta tag check
     └── generator.ts          # artifact generation + weighted protection score
 ```
@@ -92,7 +94,7 @@ co-occurrence is effectively zero.
 | # | Module | What it does |
 |---|---|---|
 | 02 | Verdict | Weighted 0–100 protection score with published weights |
-| 03 | Evidence | Live robots.txt check across 19 AI crawlers, with source links |
+| 03 | Evidence | Live robots.txt check across 170+ AI crawlers (community ai.robots.txt dataset), with source links |
 | 04 | Common Crawl | Checks the 6 latest CC indexes for your domain — the open corpus most training sets build on |
 | 05–09 | The Fix | robots.txt (+ EU Art. 4(3) reservation + RSL `License:` line), verify-your-fix, ai.txt, meta tags, legal notice |
 | 10 | RSL License | `/license.xml` in RSL 1.0 schema — machine-readable licensing for the AI-first web |
@@ -118,3 +120,4 @@ co-occurrence is effectively zero.
 - [ ] One-click deploy: open a PR to the site's repo / upload via FTP
 - [ ] C2PA "Proof of Human" content signing
 - [ ] Spawning DO NOT TRAIN registry submission
+
