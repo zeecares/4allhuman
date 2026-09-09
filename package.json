@@ -1,6 +1,6 @@
 {
   "name": "4allhuman",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Protect any creator's content from AI training in 60 seconds: scan, generate opt-outs (robots.txt, ai.txt, meta tags, EU Art.4(3) reservation), and sign content with provenance.",
   "type": "module",
   "bin": {
@@ -39,3 +39,4 @@
     "typescript": "^5.7.0"
   }
 }
+
