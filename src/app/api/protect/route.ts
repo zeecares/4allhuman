@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AI_CRAWLERS } from "@/lib/crawlers";
 import { scanSite, type ScanResult } from "@/lib/scanner";
 import { generateAllArtifacts, scoreFromScan } from "@/lib/generator";
 
@@ -14,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const scan: ScanResult = await scanSite(url);
     const artifacts = generateAllArtifacts(scan);
-    const score = scoreFromScan(scan, AI_CRAWLERS.length);
+    const score = scoreFromScan(scan);
 
     return NextResponse.json({ scan, artifacts, score });
   } catch (err) {
@@ -22,3 +21,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
