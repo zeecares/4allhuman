@@ -34,7 +34,7 @@ jobs:
       - name: Diagnose OIDC exchange
         run: |
           OIDC_TOKEN=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
-          RESP=$(curl -s -X POST https://registry.npmjs.org/-/oidc/exchange -H "Content-Type: application/json" -d "{\"token\": \"$OIDC_TOKEN\"}")
+          RESP=$(curl -s -X POST "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/4allhuman" -H "Authorization: Bearer $OIDC_TOKEN")
           if echo "$RESP" | jq -e '.token' >/dev/null 2>&1; then echo "EXCHANGE OK (token received, masked)"; else echo "EXCHANGE FAILED:"; echo "$RESP"; fi
 
       - name: Install dependencies
