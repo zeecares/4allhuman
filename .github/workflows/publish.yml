@@ -22,8 +22,11 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Show toolchain versions
-        run: node --version && npm --version
+      - name: Show toolchain versions and OIDC env
+        run: |
+          node --version
+          npm --version
+          if [ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then echo "OIDC ENV PRESENT"; else echo "OIDC ENV MISSING"; fi
 
       - name: Install dependencies
         run: npm ci
