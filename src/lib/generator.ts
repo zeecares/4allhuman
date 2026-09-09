@@ -5,9 +5,9 @@
  * 3. HTML <meta> tags (noai/noimageai + W3C TDMRep reservation)
  * 4. EU DSM Art. 4(3) reservation statement (legal notice)
  */
-import { AI_CRAWLERS, LEGAL } from "./crawlers";
-import type { ScanResult } from "./scanner";
-import { scoreFromLayers } from "./layers";
+import { AI_CRAWLERS, LEGAL } from "./crawlers.ts";
+import type { ScanResult } from "./scanner.ts";
+import { scoreFromLayers } from "./layers.ts";
 
 export type GeneratedArtifacts = {
   robotsSnippet: string;
@@ -113,3 +113,4 @@ export function generateAllArtifacts(scan: ScanResult): GeneratedArtifacts {
 export function scoreFromScan(scan: ScanResult) {
   return scoreFromLayers(scan.layers);
 }
+
