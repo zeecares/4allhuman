@@ -8,6 +8,23 @@ type ScoreResult = {
   breakdown: { label: string; got: number; max: number }[];
 };
 
+type LayerResult = {
+  id: string;
+  name: string;
+  status: "protected" | "partial" | "absent" | "info";
+  summary: string;
+  details: string[];
+  points: number;
+  maxPoints: number;
+};
+
+const LAYER_STATUS_LABEL: Record<LayerResult["status"], string> = {
+  protected: "PROTECTED",
+  partial: "PARTIAL",
+  absent: "MISSING",
+  info: "NOTE",
+};
+
 type ScanResponse = {
   scan: {
     url: string;
@@ -18,6 +35,10 @@ type ScanResponse = {
     verdicts: { userAgent: string; allowed: boolean; reason: string }[];
     metaTagsFound: string[];
     aiTxtFound: boolean;
+    xRobotsTagHeaders: string[];
+    llmsTxtFound: boolean;
+    aiPrefSignals: string[];
+    layers: LayerResult[];
     scannedAt: string;
   };
   artifacts: {
@@ -33,6 +54,7 @@ type ScanResponse = {
 
 type VerifyResponse = {
   score: ScoreResult;
+  layers?: LayerResult[];
   blockedCrawlers: string[];
   openCrawlers: string[];
 };
@@ -368,9 +390,33 @@ export default function Home() {
                 ))}
               </ul>
             </div>
+            {result.scan.layers && (
+              <ul className="layer-list">
+                {result.scan.layers.map((layer) => (
+                  <li key={layer.id} className={`layer-row layer-${layer.status}`}>
+                    <span className={`layer-pill layer-pill-${layer.status}`}>
+                      {LAYER_STATUS_LABEL[layer.status]}
+                    </span>
+                    <div className="layer-body">
+                      <div className="layer-head">
+                        <b>{layer.name}</b>
+                        <span className="layer-pts">
+                          {layer.points}/{layer.maxPoints}
+                        </span>
+                      </div>
+                      <p>{layer.summary}</p>
+                      {layer.details.length > 0 && (
+                        <p className="layer-details">{layer.details.join(" · ")}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
             <p className="method-note">
-              Score = weighted coverage of known opt-out signals. Weights are fixed and published —
-              no black box, no account, nothing stored.
+              Score = weighted coverage of known opt-out signals across every standard: robots.txt
+              (RFC 9309), X-Robots-Tag, meta noai, TDMRep, ai.txt, aipref. Weights are fixed and
+              published — no black box, no account, nothing stored.
             </p>
           </section>
 
@@ -952,3 +998,4 @@ export default function Home() {
     </main>
   );
 }
+

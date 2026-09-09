@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "update:crawlers": "node update-crawlers.mjs",
-    "test": "node --test tests/robots9309.test.ts",
+    "test": "node --test tests/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

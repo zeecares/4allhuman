@@ -59,7 +59,7 @@ numbered modules — instruments, not marketing.
 npm install
 npm run dev        # http://localhost:3000
 npm run update:crawlers   # refresh the crawler blocklist from the ai.robots.txt community dataset
-npm test               # RFC 9309 matcher spec tests (node:test, zero deps)
+npm test               # RFC 9309 + multi-layer audit tests (node:test, zero deps)
 npm run typecheck      # tsc --strict, no emit
 ```
 
@@ -74,10 +74,12 @@ src/
     ├── crawlers.ts           # re-exports the crawler blocklist + legal text
     │   ├── crawlers.generated.ts  # 170+ crawlers, generated from the community ai.robots.txt dataset
     ├── robots9309.ts         # RFC 9309 matcher: group selection, longest-match, wildcards
+    ├── layers.ts             # multi-layer audit: X-Robots-Tag, TDMRep, aipref, llms.txt, meta
     ├── scanner.ts            # live scan, per-crawler verdicts with rule-level reasons
-    └── generator.ts          # artifact generation + weighted protection score
+    └── generator.ts          # artifact generation + layered protection score
 tests/
-└── robots9309.test.ts        # spec-case tests: ties, wildcards, group precedence
+├── robots9309.test.ts        # spec-case tests: ties, wildcards, group precedence
+└── layers.test.ts            # multi-layer parsing + score tests
 ```
 
 ## Radar (module 09) — manual probe mode
@@ -94,11 +96,30 @@ Thresholds: ≥10% word-8-gram containment = **COPIED**, 2–9% = SUSPICIOUS, el
 8 consecutive shared words is the classical plagiarism-forensics threshold — chance
 co-occurrence is effectively zero.
 
+## The multi-layer audit
+
+One report across every opt-out standard, each layer with its own plain-language
+verdict and evidence:
+
+| Layer | Weight | What we check |
+|---|---|---|
+| robots.txt (RFC 9309) | 40 | Live evaluation against 170+ known AI crawlers: most-specific group, longest-match, allow-wins ties, wildcards |
+| X-Robots-Tag header | 15 | `noai` / `noimageai` (global = full, per-bot or `none`/`noindex` = partial) |
+| noai meta tags | 15 | `<meta name="robots" content="noai, noimageai">` on the homepage |
+| TDMRep (W3C) | 10 | `tdm-reservation: 1` header or meta — the machine-readable EU DSM Art. 4(3) reservation |
+| ai.txt | 10 | `/ai.txt` published and actually denying training/dataset use (honor-based) |
+| aipref (IETF draft) | 5 | `ai-train=n`-style preference tokens (draft-ietf-aipref-vocab) |
+| Reachable | 5 | The site answered the scan, so every verdict is live evidence |
+| llms.txt | 0 | Informational only — it is the ALLOW-side counterpart (guides LLM use), not an opt-out |
+
+The same layer builders score user-pasted artifacts in verify-your-fix, so the
+before/after score is computed identically to a live scan.
+
 ## Modules
 
 | # | Module | What it does |
 |---|---|---|
-| 02 | Verdict | Weighted 0–100 protection score with published weights |
+| 02 | Verdict | Multi-layer audit — one 0–100 score across every opt-out standard (weights below) |
 | 03 | Evidence | Live robots.txt check across 170+ AI crawlers (community ai.robots.txt dataset), with source links |
 | 04 | Common Crawl | Checks the 6 latest CC indexes for your domain — the open corpus most training sets build on |
 | 05–09 | The Fix | robots.txt (+ EU Art. 4(3) reservation + RSL `License:` line), verify-your-fix, ai.txt, meta tags, legal notice |
@@ -125,3 +146,4 @@ co-occurrence is effectively zero.
 - [ ] One-click deploy: open a PR to the site's repo / upload via FTP
 - [ ] C2PA "Proof of Human" content signing
 - [ ] Spawning DO NOT TRAIN registry submission
+

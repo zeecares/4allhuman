@@ -405,3 +405,34 @@ footer a { color: var(--orange); }
 }
 .ref-list li:last-child { border-bottom: none; }
 .ref-list a { color: var(--orange); }
+
+
+/* ── multi-layer audit ────────────────────────────────────────────────────── */
+.layer-list { list-style: none; margin: 0; padding: 0; }
+.layer-row {
+  align-items: flex-start;
+  border-top: 1px solid var(--panel-dark);
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+}
+.layer-row:last-child { border-bottom: 1px solid var(--panel-dark); }
+.layer-pill {
+  border-radius: 2px;
+  flex: 0 0 84px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin-top: 2px;
+  padding: 3px 6px;
+  text-align: center;
+}
+.layer-pill-protected { background: var(--green); color: #fff; }
+.layer-pill-partial   { background: #ffd60a; color: var(--ink); }
+.layer-pill-absent    { background: var(--red); color: #fff; }
+.layer-pill-info      { background: var(--panel-dark); color: var(--muted); }
+.layer-body { flex: 1; }
+.layer-head { display: flex; justify-content: space-between; gap: 8px; }
+.layer-pts { color: var(--muted); font-size: 0.72rem; }
+.layer-body p { font-size: 0.8rem; margin: 4px 0 0; }
+.layer-details { color: var(--muted); font-size: 0.7rem !important; }
