@@ -59,6 +59,8 @@ numbered modules — instruments, not marketing.
 npm install
 npm run dev        # http://localhost:3000
 npm run update:crawlers   # refresh the crawler blocklist from the ai.robots.txt community dataset
+npm test               # RFC 9309 matcher spec tests (node:test, zero deps)
+npm run typecheck      # tsc --strict, no emit
 ```
 
 ## Architecture
@@ -71,8 +73,11 @@ src/
 └── lib/
     ├── crawlers.ts           # re-exports the crawler blocklist + legal text
     │   ├── crawlers.generated.ts  # 170+ crawlers, generated from the community ai.robots.txt dataset
-    ├── scanner.ts            # live robots.txt parser (RFC 9309 groups) + meta tag check
+    ├── robots9309.ts         # RFC 9309 matcher: group selection, longest-match, wildcards
+    ├── scanner.ts            # live scan, per-crawler verdicts with rule-level reasons
     └── generator.ts          # artifact generation + weighted protection score
+tests/
+└── robots9309.test.ts        # spec-case tests: ties, wildcards, group precedence
 ```
 
 ## Radar (module 09) — manual probe mode
@@ -120,4 +125,3 @@ co-occurrence is effectively zero.
 - [ ] One-click deploy: open a PR to the site's repo / upload via FTP
 - [ ] C2PA "Proof of Human" content signing
 - [ ] Spawning DO NOT TRAIN registry submission
-
