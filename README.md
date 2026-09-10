@@ -144,6 +144,19 @@ verdict and evidence:
 The same layer builders score user-pasted artifacts in verify-your-fix, so the
 before/after score is computed identically to a live scan.
 
+## Dogfooding: this site scores itself
+
+4allhuman.vercel.app runs its own full fix. `/robots.txt` blocks all 174 known
+AI crawlers with the RSL `License:` pointer, `/ai.txt` denies training and
+dataset use under the Spawning spec, every response carries
+`X-Robots-Tag: noai, noimageai` and the TDMRep `tdm-reservation: 1` header, the
+homepage `<head>` publishes the noai/noimageai, TDMRep, and aipref meta tags,
+`/license.xml` serves the RSL 1.0 no-training license, `/tdm-policy.txt`
+publishes the reserved-rights notice, and the module 13 canary
+`dtom-c30c29e5` is embedded as an HTML comment on every page and at
+`/canary.txt`. Its own audit went 5/100 to 100/100;
+`tests/site-artifacts.test.ts` keeps the artifacts from rotting.
+
 ## Modules
 
 | # | Module | What it does |
@@ -159,6 +172,7 @@ before/after score is computed identically to a live scan.
 | §§ | Honesty layer | What this can and cannot do |
 
 ## Key references
+
 
 - Directive (EU) 2019/790 Arts. 3–4 (TDM opt-out) — [EUR-Lex](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32019L0790)
 - Regulation (EU) 2024/1689 (AI Act) Art. 53(1)(c)–(d) — [EUR-Lex](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202401689)

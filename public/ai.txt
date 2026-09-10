@@ -1,0 +1,20 @@
+# ai.txt — machine-readable AI access policy
+# Spec: Spawning AI ai.txt proposal (https://spawning.ai/documents/ai.txt)
+# Domain: https://4allhuman.vercel.app
+# Generated: 2026-09-10T11:12:44.704Z
+
+User-Agent: *
+Permission: deny-training
+Permission: deny-dataset
+Permission: deny-inference-prompting
+
+# EU DSM Directive (EU) 2019/790 Article 4(3) rights reservation
+# The rightholder expressly reserves the rights referred to in Article 4(1)
+# and Article 7(1) of Directive 96/9/EC, Article 2 and 3 of Directive 2001/29/EC,
+# and Article 4(1)(a) and (b) of Directive 2009/24/EC with respect to the
+# text and data mining exception in Article 4 of Directive (EU) 2019/790.
+# This reservation applies to all content on this domain unless a licence
+# is granted in writing by the rightholder.
+# Providers of general-purpose AI models must identify and comply with this
+# machine-readable reservation (Regulation (EU) 2024/1689, Art. 53(1)(c)) and
+# publish a sufficiently detailed summary of training content (Art. 53(1)(d)).
