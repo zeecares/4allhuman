@@ -155,6 +155,7 @@ before/after score is computed identically to a live scan.
 | 10 | RSL License | `/license.xml` in RSL 1.0 schema — machine-readable licensing for the AI-first web |
 | 11 | Radar | Manual probe mode: generate questions → ask engines yourself → local 8-gram forensics; plus **DE-COP memorization quiz** (arXiv 2402.09910) scoring verbatim-recognition against the 25% chance line |
 | 12 | Claim window | Dates the site's rights reservation by bisecting its archived robots.txt at the Internet Archive, then sorts published Common Crawl windows into before/after that date — with both boundary permalinks and a downloadable plain-text record |
+| 13 | Canary | Mints a unique publish-time fingerprint (HTML comment + `/canary.txt`), generates prefix-completion probe questions, and scores pasted engine answers — a surfaced token proves the engine had access to your content (lab-validated ~0.9 AUC, never court-tested, covers only content published after the canary goes in) |
 | §§ | Honesty layer | What this can and cannot do |
 
 ## Key references
@@ -163,6 +164,7 @@ before/after score is computed identically to a live scan.
 - Regulation (EU) 2024/1689 (AI Act) Art. 53(1)(c)–(d) — [EUR-Lex](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202401689)
 - U.S. Copyright Office, *Copyright and AI Part 3: Generative AI Training* (2025) — [copyright.gov/ai](https://www.copyright.gov/ai/)
 - DE-COP: detecting copyrighted content in training data — [arXiv 2402.09910](https://arxiv.org/abs/2402.09910)
+- SIGIL: publish-time canary watermarks for training-membership evidence — [arXiv 2606.06502](https://arxiv.org/html/2606.06502)
 - Beyond Public Access in LLM Pre-Training Data — [arXiv 2505.00020](https://arxiv.org/abs/2505.00020)
 - Stealing Part of a Production Language Model (canary extraction) — [arXiv 2403.06634](https://arxiv.org/abs/2403.06634)
 - RSL 1.0 Really Simple Licensing — [rslstandard.org](https://rslstandard.org/) · [RSL Collective](https://rslcollective.org/)
