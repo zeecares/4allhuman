@@ -51,16 +51,17 @@ h1 .shield { color: var(--orange); }
 }
 
 /* ── scan input row: hardware key style ── */
-.scan-form { display: flex; gap: 10px; }
+.scan-form { display: flex; flex-wrap: wrap; gap: 10px; }
 .scan-form input {
   background: var(--panel);
   border: 2px solid var(--line);
   border-radius: 0;
   box-shadow: inset 0 -3px 0 rgba(26, 26, 24, 0.12);
   color: var(--ink);
-  flex: 1;
+  flex: 1 1 16ch;
   font-family: inherit;
   font-size: 1rem;
+  min-width: 0;
   padding: 14px 16px;
 }
 .scan-form input::placeholder { color: var(--muted); }
@@ -75,6 +76,7 @@ h1 .shield { color: var(--orange); }
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 700;
+  max-width: 100%;
   padding: 14px 26px;
   text-transform: uppercase;
 }
