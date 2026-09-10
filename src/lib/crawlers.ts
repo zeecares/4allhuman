@@ -23,12 +23,20 @@ export const LEGAL = {
     "# and Article 4(1)(a) and (b) of Directive 2009/24/EC with respect to the\n" +
     "# text and data mining exception in Article 4 of Directive (EU) 2019/790.\n" +
     "# This reservation applies to all content on this domain unless a licence\n" +
-    "# is granted in writing by the rightholder.",
+    "# is granted in writing by the rightholder.\n" +
+    "# Providers of general-purpose AI models must identify and comply with this\n" +
+    "# machine-readable reservation (Regulation (EU) 2024/1689, Art. 53(1)(c)) and\n" +
+    "# publish a sufficiently detailed summary of training content (Art. 53(1)(d)).",
   notice:
     "This site reserves all rights regarding the use of its content for machine learning,\n" +
     "model training, or dataset construction. Text and data mining (including for AI\n" +
     "training) is not permitted without prior written consent. Automated access that\n" +
     "disregards these directives may constitute copyright infringement and/or breach\n" +
-    "of these terms.",
+    "of these terms.\n" +
+    "\n" +
+    "The date this reservation took effect is independently verifiable from the Internet\n" +
+    "Archive record of this domain's robots.txt. The rightholder probes AI model outputs\n" +
+    "for memorization of this site's content on an ongoing basis (verbatim-overlap and\n" +
+    "multiple-choice membership forensics) and keeps dated records for enforcement.",
 };
 
