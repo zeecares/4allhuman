@@ -1,0 +1,7 @@
+content-fingerprint: dtom-c30c29e5
+domain: 4allhuman.vercel.app
+minted: 2026-09-10
+
+This unique fingerprint was embedded in this site's pages at publish time.
+It appears nowhere else. If an AI model reproduces it, the model had access
+to this site's content.
