@@ -13,6 +13,7 @@ import {
   scoreFromLayers,
   tdmRepLayer,
 } from "@/lib/layers";
+import { parseTermsTxt, termsTxtLayer } from "@/lib/terms";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as {
       robotsTxt?: string;
       aiTxt?: string;
+      termsTxt?: string;
       metaHtml?: string;
       xRobotsTag?: string | string[];
     };
@@ -74,6 +76,7 @@ export async function POST(req: NextRequest) {
       metaLayer(metaTagsFound),
       tdmRepLayer(tdm),
       aiTxtLayer(!!body.aiTxt, body.aiTxt ?? null),
+      termsTxtLayer(body.termsTxt ? parseTermsTxt(body.termsTxt) : null, !!body.termsTxt),
       aiPrefLayer(aiPrefSignals),
       reachableLayer(true), // pasted content is definitionally "deployed"
     ];
