@@ -645,6 +645,7 @@ footer a { color: var(--orange); }
 /* ── Cloudflare audit card ────────────────────────────────────────────────── */
 .cf-card { border: 2px solid var(--line); }
 .cf-card-high { border-left: 6px solid var(--red); }
+.cf-card-warning { border-left: 6px solid var(--orange); }
 .cf-card-good { border-left: 6px solid var(--green); }
 .cf-card-neutral { border-left: 6px solid var(--muted); }
 .cf-card h2 .layer-pill { margin-left: auto; }
