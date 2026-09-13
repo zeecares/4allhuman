@@ -28,7 +28,7 @@ type RemediationStep = {
 
 type CloudflareCheckResult = {
   isCloudflare: boolean;
-  riskLevel: "HIGH_RISK" | "GOOD" | "NEUTRAL" | "SKIPPED";
+  riskLevel: "HIGH_RISK" | "WARNING" | "GOOD" | "NEUTRAL" | "SKIPPED";
   googleExtendedStatus: "CORRECT" | "DANGEROUS" | "MISSING" | "ALLOW" | null;
   scoreDelta: number;
   headline: string;
@@ -199,8 +199,10 @@ function SkeletonCard() {
 
 /**
  * Cloudflare infrastructure audit card.
- * Shows the September 15 AI crawler blocking risk and Google-Extended status.
- * HIGH_RISK: red/orange warning with remediation steps expanded (urgent).
+ * Shows the September 15 AI crawler blocking change and Google-Extended status.
+ * WARNING: orange check-your-settings card (dashboard setting not observable,
+ *   no score penalty) with remediation steps.
+ * HIGH_RISK: red urgent card (Googlebot blocked in robots.txt — scored -15).
  * GOOD: green confirmation card.
  * NEUTRAL: grey informational card.
  * SKIPPED: nothing shown (non-Cloudflare sites).
@@ -209,22 +211,33 @@ function CloudflareCheckCard({ cf }: { cf: CloudflareCheckResult }) {
   if (cf.riskLevel === "SKIPPED") return null;
 
   const isHighRisk = cf.riskLevel === "HIGH_RISK";
+  const isWarning = cf.riskLevel === "WARNING";
   const isGood = cf.riskLevel === "GOOD";
   const isNeutral = cf.riskLevel === "NEUTRAL";
 
   const cardClass = isHighRisk
     ? "card cf-card cf-card-high"
-    : isGood
-      ? "card cf-card cf-card-good"
-      : "card cf-card cf-card-neutral";
+    : isWarning
+      ? "card cf-card cf-card-warning"
+      : isGood
+        ? "card cf-card cf-card-good"
+        : "card cf-card cf-card-neutral";
 
   const pillClass = isHighRisk
     ? "layer-pill layer-pill-absent"
-    : isGood
-      ? "layer-pill layer-pill-protected"
-      : "layer-pill layer-pill-info";
+    : isWarning
+      ? "layer-pill layer-pill-partial"
+      : isGood
+        ? "layer-pill layer-pill-protected"
+        : "layer-pill layer-pill-info";
 
-  const pillLabel = isHighRisk ? "HIGH RISK" : isGood ? "CONFIGURED" : "INFO";
+  const pillLabel = isHighRisk
+    ? "HIGH RISK"
+    : isWarning
+      ? "CHECK SETTINGS"
+      : isGood
+        ? "CONFIGURED"
+        : "INFO";
 
   return (
     <section className={cardClass}>
@@ -240,9 +253,9 @@ function CloudflareCheckCard({ cf }: { cf: CloudflareCheckResult }) {
           {cf.detail}
         </p>
 
-        {isHighRisk && (
+        {(isHighRisk || isWarning) && (
           <div className="cf-deadline-banner" style={{
-            background: "var(--red)",
+            background: isHighRisk ? "var(--red)" : "var(--orange)",
             color: "#fff",
             padding: "10px 14px",
             margin: "0 0 16px",
@@ -251,8 +264,9 @@ function CloudflareCheckCard({ cf }: { cf: CloudflareCheckResult }) {
             textTransform: "uppercase",
             letterSpacing: "0.02em",
           }}>
-            ⚠️ DEADLINE: SEPTEMBER 15, 2026 — Cloudflare changes AI crawler blocking. Without
-            Google-Extended, your site may lose Google Search traffic.
+            ⚠️ DEADLINE: TUESDAY, SEPTEMBER 15, 2026 — if Cloudflare&apos;s &quot;Block AI
+            bots&quot; preset is on for this site, it will also block Googlebot. Check Security →
+            Bots in your dashboard; only you can see that setting.
           </div>
         )}
 
