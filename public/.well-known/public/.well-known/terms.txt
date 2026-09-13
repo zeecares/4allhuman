@@ -1,0 +1,13 @@
+# terms.txt - machine-access terms for 4allhuman.vercel.app
+# Format per the terms.txt proposal (arXiv:2609.11152, September 10 2026).
+# Dogfood: the Don't Train On Me scanner serves its own declared terms.
+Version: 1
+Terms-ID: 4allhuman.vercel.app
+
+Path: /
+Unsigned: allow
+Purpose: search    allow   use=reference
+Purpose: agent     allow   use=immediate
+Purpose: train-ai  deny
+Purpose: archive   allow
+Purpose: research  allow   use=reference
