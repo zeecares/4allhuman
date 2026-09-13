@@ -13,6 +13,7 @@ import {
   scoreFromLayers,
   tdmRepLayer,
 } from "@/lib/layers";
+import { checkCloudflareConfiguration } from "@/lib/cloudflare";
 
 export const runtime = "nodejs";
 
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
       aiTxt?: string;
       metaHtml?: string;
       xRobotsTag?: string | string[];
+      responseHeaders?: Record<string, string | string[] | undefined>;
     };
 
     if (!body.robotsTxt && !body.aiTxt && !body.metaHtml && !body.xRobotsTag) {
@@ -79,13 +81,31 @@ export async function POST(req: NextRequest) {
     ];
     const score = scoreFromLayers(layers);
 
+    // Cloudflare infrastructure audit: if the user provides response headers
+    // (e.g. from their live site), run the Cloudflare check against the pasted
+    // robots.txt. This lets creators verify their Google-Extended setup.
+    const cloudflare = body.responseHeaders
+      ? checkCloudflareConfiguration(body.responseHeaders, body.robotsTxt ?? null)
+      : null;
+    const cfDelta = cloudflare?.scoreDelta ?? 0;
+    const adjustedScore = Math.max(0, Math.min(100, score.score + cfDelta));
+
     return NextResponse.json({
-      score,
+      score: {
+        score: adjustedScore,
+        breakdown: [
+          ...score.breakdown,
+          ...(cfDelta !== 0
+            ? [{ label: "Adjustment: Googlebot blocked (Cloudflare check)", got: cfDelta, max: 0 }]
+            : []),
+        ],
+      },
       layers,
       blockedCrawlers: blocked,
       openCrawlers: AI_CRAWLERS.filter((c) => !blocked.includes(c.userAgent)).map(
         (c) => c.userAgent,
       ),
+      ...(cloudflare ? { cloudflare } : {}),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Verification failed";

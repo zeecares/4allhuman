@@ -47,6 +47,15 @@ function fakeScanResult(overrides: Partial<ScanResult> = {}): ScanResult {
     tdm: { reserved: false, policy: null, sources: [] },
     llmsTxtFound: false,
     aiPrefSignals: [],
+    cloudflare: {
+      isCloudflare: false,
+      riskLevel: "SKIPPED",
+      googleExtendedStatus: null,
+      scoreDelta: 0,
+      headline: "Not behind Cloudflare",
+      detail: "This site is not proxied through Cloudflare.",
+      remediation: null,
+    },
     layers: [
       layer("robots", "robots.txt (RFC 9309)", "partial", 9, 40, "2/3 known AI crawlers blocked - 1 can still crawl for training.", [
         "Evaluated with full RFC 9309 matching.",

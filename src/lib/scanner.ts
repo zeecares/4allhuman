@@ -26,6 +26,7 @@ import {
   type LayerResult,
   type TdmSignals,
 } from "./layers.ts";
+import { checkCloudflareConfiguration, type CloudflareCheckResult } from "./cloudflare.ts";
 
 // Meta extraction moved to layers.ts; re-export for existing callers.
 export { extractMetaTags };
@@ -55,6 +56,8 @@ export type ScanResult = {
   llmsTxtFound: boolean;
   /** aipref (IETF draft) preference tokens detected in headers/HTML. */
   aiPrefSignals: string[];
+  /** Cloudflare infrastructure audit (Sept 15 AI crawler blocking change). */
+  cloudflare: CloudflareCheckResult;
   /** The layered audit: one verdict per opt-out standard, plain language. */
   layers: LayerResult[];
   scannedAt: string;
@@ -71,6 +74,8 @@ type FetchedPage = {
   xRobotsTag: string[];
   tdmReservation: string[];
   tdmPolicy: string[];
+  /** All response headers as a plain object, for Cloudflare detection. */
+  responseHeaders: Record<string, string>;
 };
 
 const DEFAULT_TIMEOUT_MS = 8000;
@@ -81,14 +86,22 @@ async function fetchText(url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<s
 }
 
 async function fetchPage(url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<FetchedPage> {
-  const empty: FetchedPage = { text: null, xRobotsTag: [], tdmReservation: [], tdmPolicy: [] };
+  const empty: FetchedPage = { text: null, xRobotsTag: [], tdmReservation: [], tdmPolicy: [], responseHeaders: {} };
   try {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(timeoutMs),
       headers: { "User-Agent": "DontTrainOnMe-Scanner/0.1 (hackathon project)" },
       redirect: "follow",
     });
-    if (!res.ok) return empty;
+    // Collect all response headers into a plain object for Cloudflare
+    // detection BEFORE the res.ok check: a bot-blocked 403 from Cloudflare
+    // still carries cf-ray / server headers, and those are exactly the sites
+    // the Cloudflare audit must not silently skip.
+    const responseHeaders: Record<string, string> = {};
+    res.headers.forEach((value, key) => {
+      responseHeaders[key.toLowerCase()] = value;
+    });
+    if (!res.ok) return { ...empty, responseHeaders };
     // getSettled()/getAll aren't universal; headers.forEach yields one entry
     // per distinct field, with repeats already comma-joined by the spec.
     const collect = (name: string): string[] => {
@@ -100,6 +113,7 @@ async function fetchPage(url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<F
       xRobotsTag: collect("x-robots-tag"),
       tdmReservation: collect("tdm-reservation"),
       tdmPolicy: collect("tdm-policy"),
+      responseHeaders,
     };
   } catch {
     return empty;
@@ -161,6 +175,10 @@ export async function scanSite(rawUrl: string, options: ScanOptions = {}): Promi
   const aiPrefSignals = detectAiPref([...homepage.xRobotsTag, homepage.text]);
   const reachable = !!(robotsTxt || homepage.text);
 
+  // Cloudflare infrastructure audit: detect Cloudflare proxy and check
+  // Google-Extended in robots.txt for the September 15 AI crawler blocking change.
+  const cloudflare = checkCloudflareConfiguration(homepage.responseHeaders, robotsTxt);
+
   const layers: LayerResult[] = [
     robotsLayer({
       blockedCount: blockedCrawlers.length,
@@ -189,6 +207,7 @@ export async function scanSite(rawUrl: string, options: ScanOptions = {}): Promi
     tdm,
     llmsTxtFound: !!llmsTxt,
     aiPrefSignals,
+    cloudflare,
     layers,
     scannedAt: new Date().toISOString(),
   };

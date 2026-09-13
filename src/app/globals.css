@@ -640,3 +640,14 @@ footer a { color: var(--orange); }
 .post__cta-link:hover {
   text-decoration: underline;
 }
+
+
+/* ── Cloudflare audit card ────────────────────────────────────────────────── */
+.cf-card { border: 2px solid var(--line); }
+.cf-card-high { border-left: 6px solid var(--red); }
+.cf-card-warning { border-left: 6px solid var(--orange); }
+.cf-card-good { border-left: 6px solid var(--green); }
+.cf-card-neutral { border-left: 6px solid var(--muted); }
+.cf-card h2 .layer-pill { margin-left: auto; }
+.cf-remediation li { border-radius: 0; }
+.cf-remediation pre { white-space: pre-wrap; word-break: break-word; }

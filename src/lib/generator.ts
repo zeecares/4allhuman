@@ -107,10 +107,25 @@ export function generateAllArtifacts(scan: ScanResult): GeneratedArtifacts {
  * Protection score — a sum over the multi-layer audit (src/lib/layers.ts).
  * Weights: robots.txt 40, X-Robots-Tag 15, meta noai 15, TDMRep 10,
  * ai.txt 10, aipref 5, reachable 5 (llms.txt is informational, 0).
+ * The Cloudflare infrastructure check is informational only — a site's
+ * "Block AI bots" dashboard setting is not observable from outside — with
+ * one scored exception: robots.txt blocking Googlebot itself deducts 15,
+ * shown as an explicit adjustment line so the layer weights stay intact.
  * Decoupled from ScanResult so /api/verify can score user-pasted
  * artifacts with the exact same layer builders.
  */
 export function scoreFromScan(scan: ScanResult) {
-  return scoreFromLayers(scan.layers);
+  const base = scoreFromLayers(scan.layers);
+  const cfDelta = scan.cloudflare?.scoreDelta ?? 0;
+  const score = Math.max(0, Math.min(100, base.score + cfDelta));
+  return {
+    score,
+    breakdown: [
+      ...base.breakdown,
+      ...(cfDelta !== 0
+        ? [{ label: "Adjustment: Googlebot blocked (Cloudflare check)", got: cfDelta, max: 0 }]
+        : []),
+    ],
+  };
 }
 
