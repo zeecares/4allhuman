@@ -93,18 +93,21 @@ async function fetchPage(url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<F
       headers: { "User-Agent": "DontTrainOnMe-Scanner/0.1 (hackathon project)" },
       redirect: "follow",
     });
-    if (!res.ok) return empty;
+    // Collect all response headers into a plain object for Cloudflare
+    // detection BEFORE the res.ok check: a bot-blocked 403 from Cloudflare
+    // still carries cf-ray / server headers, and those are exactly the sites
+    // the Cloudflare audit must not silently skip.
+    const responseHeaders: Record<string, string> = {};
+    res.headers.forEach((value, key) => {
+      responseHeaders[key.toLowerCase()] = value;
+    });
+    if (!res.ok) return { ...empty, responseHeaders };
     // getSettled()/getAll aren't universal; headers.forEach yields one entry
     // per distinct field, with repeats already comma-joined by the spec.
     const collect = (name: string): string[] => {
       const v = res.headers.get(name);
       return v ? [v] : [];
     };
-    // Collect all response headers into a plain object for Cloudflare detection.
-    const responseHeaders: Record<string, string> = {};
-    res.headers.forEach((value, key) => {
-      responseHeaders[key.toLowerCase()] = value;
-    });
     return {
       text: await res.text(),
       xRobotsTag: collect("x-robots-tag"),
