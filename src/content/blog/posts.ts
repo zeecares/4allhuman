@@ -35,12 +35,12 @@ export const posts: BlogPost[] = [
     date: "2026-09-14",
     author: "Zee Wang",
     description:
-      "Cloudflare's new crawler defaults take effect Monday. If you turned on AI bot blocking to protect your content, you may accidentally block Googlebot — and lose your search rankings. Here's what's happening and how to fix it before Monday.",
+      "Cloudflare's new crawler defaults take effect Tuesday. If you turned on AI bot blocking to protect your content, you may accidentally block Googlebot — and lose your search rankings. Here's what's happening and how to fix it before Tuesday.",
     tags: ["cloudflare", "seo", "ai-crawlers", "robots-txt"],
     blocks: [
       {
         type: "p",
-        text: "On Monday September 15, Cloudflare is changing how its AI crawler blocking works. If you turned on the \u201CBlock AI bots\u201D preset to protect your content from training scrapers, you're about to block Googlebot too \u2014 unless you act before Monday.",
+        text: "On Tuesday, September 15, Cloudflare is changing how its AI crawler blocking works. If you turned on the \u201CBlock AI bots\u201D preset to protect your content from training scrapers, you're about to block Googlebot too \u2014 unless you act before Tuesday.",
       },
       { type: "h2", text: "What's changing" },
       {
@@ -87,7 +87,7 @@ export const posts: BlogPost[] = [
       { type: "h2", text: "Check your site now" },
       {
         type: "p",
-        text: "Scan your site at 4allhuman.vercel.app to check your full AI training opt-out posture and make sure your configuration is correct before Monday.",
+        text: "Scan your site at 4allhuman.vercel.app to check your full AI training opt-out posture and make sure your configuration is correct before Tuesday.",
       },
     ],
   },
