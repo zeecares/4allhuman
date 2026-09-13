@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
         breakdown: [
           ...score.breakdown,
           ...(cfDelta !== 0
-            ? [{ label: "Cloudflare infra", got: cfDelta, max: 0 }]
+            ? [{ label: "Adjustment: Googlebot blocked (Cloudflare check)", got: cfDelta, max: 0 }]
             : []),
         ],
       },
