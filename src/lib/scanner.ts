@@ -11,6 +11,7 @@
  */
 import { AI_CRAWLERS } from "./crawlers.ts";
 import { explain, parseRobots } from "./robots9309.ts";
+import { checkTermsTxt, termsTxtLayer } from "./terms.ts";
 import {
   aiPrefLayer,
   aiTxtLayer,
@@ -153,11 +154,12 @@ export async function scanSite(rawUrl: string, options: ScanOptions = {}): Promi
   }
 
   const origin = base.origin;
-  const [robotsTxt, homepage, aiTxt, llmsTxt] = await Promise.all([
+  const [robotsTxt, homepage, aiTxt, llmsTxt, termsTxt] = await Promise.all([
     fetchText(`${origin}/robots.txt`, timeoutMs),
     fetchPage(base.toString(), timeoutMs),
     fetchText(`${origin}/ai.txt`, timeoutMs),
     fetchText(`${origin}/llms.txt`, timeoutMs),
+    checkTermsTxt(origin, timeoutMs),
   ]);
 
   const verdicts = robotsTxt ? evaluateCrawlers(robotsTxt) : [];
@@ -190,6 +192,7 @@ export async function scanSite(rawUrl: string, options: ScanOptions = {}): Promi
     tdmRepLayer(tdm),
     aiTxtLayer(!!aiTxt, aiTxt),
     llmsTxtLayer(!!llmsTxt),
+    termsTxtLayer(termsTxt.parsed, termsTxt.found, termsTxt.signals),
     aiPrefLayer(aiPrefSignals),
     reachableLayer(reachable),
   ];

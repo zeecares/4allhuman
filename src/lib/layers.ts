@@ -26,6 +26,7 @@ export type LayerResult = {
     | "tdmrep"
     | "aitxt"
     | "llmstxt"
+    | "termstxt"
     | "aipref"
     | "reachable";
   name: string;
