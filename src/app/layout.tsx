@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./globals.css";
 
 // The site's own publish-time canary (module 13), minted for
@@ -20,12 +21,31 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
         {/* Publish-time canary: invisible to readers, visible to crawlers. */}
-        <span dangerouslySetInnerHTML={{ __html: `<!-- content-fingerprint: ${SITE_CANARY_ID} -->` }} />
+        <span
+          dangerouslySetInnerHTML={{
+            __html: `<!-- content-fingerprint: ${SITE_CANARY_ID} -->`,
+          }}
+        />
+        <nav className="site-nav">
+          <Link href="/" className="nav-link">
+            Scanner
+          </Link>
+          <Link href="/blog" className="nav-link">
+            Blog
+          </Link>
+          <Link href="/security-policy" className="nav-link">
+            Security
+          </Link>
+        </nav>
         {children}
       </body>
     </html>
