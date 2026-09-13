@@ -1,27 +1,35 @@
 /**
  * Cloudflare infrastructure audit check.
  *
- * On September 15, 2026, Cloudflare changes how its AI crawler blocking works:
- * crawlers are now categorised by ALL their behaviours. Multi-purpose crawlers
- * (Googlebot, Applebot, BingBot) are subject to the most restrictive rule that
- * applies to any of their behaviours. The "Block AI bots" preset many site
- * owners turned on will now also block Googlebot — Cloudflare explicitly states
- * this. It applies to new customers, new sites, AND all existing free-plan
- * customers who haven't changed settings. Google drives ~88% of referral traffic.
+ * On Tuesday, September 15, 2026, Cloudflare changes how its AI crawler
+ * blocking works: crawlers are now categorised by ALL their behaviours.
+ * Multi-purpose crawlers (Googlebot, Applebot, BingBot) are subject to the
+ * most restrictive rule that applies to any of their behaviours. The "Block
+ * AI bots" preset many site owners turned on will now also block Googlebot —
+ * Cloudflare explicitly states this. It applies to new customers, new sites,
+ * AND all existing free-plan customers who haven't changed settings.
+ * Google drives ~88% of referral traffic.
  *
- * The fix: use Google-Extended in robots.txt (a robots.txt token, not a
- * separate crawler) to opt out of Google's AI training without blocking
- * Googlebot for search.
+ * What we can and cannot see: whether "Block AI bots" is on for a given site
+ * lives in the owner's Cloudflare dashboard and is NOT observable from
+ * outside. So a Cloudflare site without Google-Extended gets an unpenalized
+ * WARNING card ("check your dashboard"), never a score deduction. The only
+ * scored case is the one we can observe and that is dangerous on its own:
+ * robots.txt blocking Googlebot itself (-15).
+ *
+ * The fix we recommend: use Google-Extended in robots.txt (a robots.txt
+ * token, not a separate crawler) to opt out of Google's AI training without
+ * blocking Googlebot for search.
  *
  * This module detects whether a site is behind Cloudflare, checks for
- * Google-Extended in robots.txt, classifies the risk, and provides
+ * Google-Extended in robots.txt, classifies the configuration, and provides
  * remediation steps. Zero dependencies; uses the existing robots9309 parser.
  */
 import { governingGroup, parseRobots, winningRule, type ParsedRobots } from "./robots9309.ts";
 
 export type GoogleExtendedStatus = "CORRECT" | "DANGEROUS" | "MISSING" | "ALLOW";
 
-export type CloudflareRiskLevel = "HIGH_RISK" | "GOOD" | "NEUTRAL" | "SKIPPED";
+export type CloudflareRiskLevel = "HIGH_RISK" | "WARNING" | "GOOD" | "NEUTRAL" | "SKIPPED";
 
 export interface RemediationStep {
   step: number;
@@ -105,12 +113,12 @@ export function classifyGoogleExtended(robotsTxt: string | null): GoogleExtended
 
 // ── Remediation copy ───────────────────────────────────────────────────────
 
-const HIGH_RISK_REMEDIATION: RemediationStep[] = [
+const WARNING_REMEDIATION: RemediationStep[] = [
   {
     step: 1,
-    title: "Review your Cloudflare AI blocking preset",
+    title: "Check your Cloudflare AI blocking preset",
     description:
-      "Go to Security → Bots in your Cloudflare dashboard. Check if you have a site-wide AI training block enabled. After September 15, this preset will also block Googlebot — not just AI training crawlers — because Googlebot is now categorised by all its behaviours, and AI training is one of them.",
+      "Go to Security → Bots in your Cloudflare dashboard. If the 'Block AI bots' preset is on, from Tuesday, September 15 it will also block Googlebot — not just AI training crawlers — because Googlebot is now categorised by all its behaviours, and AI training is one of them. We cannot see this setting from outside; only you can check it.",
   },
   {
     step: 2,
@@ -157,7 +165,8 @@ export function checkCloudflareConfiguration(
 
   const geStatus = classifyGoogleExtended(robotsTxt);
 
-  // DANGEROUS: Googlebot itself is blocked — this is bad regardless of Cloudflare
+  // HIGH_RISK: Googlebot itself is blocked — observable from outside and bad
+  // regardless of Cloudflare. This is the ONLY case that touches the score.
   if (geStatus === "DANGEROUS") {
     return {
       isCloudflare: true,
@@ -166,7 +175,7 @@ export function checkCloudflareConfiguration(
       scoreDelta: -15,
       headline: "Googlebot is blocked in robots.txt — search traffic is at risk",
       detail:
-        "Your robots.txt has Disallow: / under Googlebot. This blocks Google Search from indexing your site entirely. After September 15, Cloudflare's AI blocking change makes this worse — but blocking Googlebot was already catastrophic for search traffic. Remove the Googlebot block and use Google-Extended instead to opt out of AI training only.",
+        "Your robots.txt has Disallow: / under Googlebot. This blocks Google Search from indexing your site entirely. After Tuesday, September 15, Cloudflare's AI blocking change makes this worse — but blocking Googlebot was already catastrophic for search traffic. Remove the Googlebot block and use Google-Extended instead to opt out of AI training only.",
       remediation: [
         {
           step: 1,
@@ -185,23 +194,26 @@ export function checkCloudflareConfiguration(
           step: 3,
           title: "Review your Cloudflare AI blocking preset",
           description:
-            "Go to Security → Bots in your Cloudflare dashboard. After September 15, the 'Block AI bots' preset will also block Googlebot. Ensure you are not relying on a blanket block — use Google-Extended in robots.txt for targeted AI opt-out.",
+            "Go to Security → Bots in your Cloudflare dashboard. After Tuesday, September 15, the 'Block AI bots' preset will also block Googlebot. Ensure you are not relying on a blanket block — use Google-Extended in robots.txt for targeted AI opt-out.",
         },
       ],
     };
   }
 
-  // HIGH_RISK: on Cloudflare + no Google-Extended (likely affected by Sept 15 change)
+  // WARNING: on Cloudflare + no Google-Extended. Whether the Sept 15 change
+  // actually bites depends on the site's Cloudflare dashboard settings, which
+  // are not observable from outside — so this is an unpenalized warning card,
+  // not a score deduction.
   if (geStatus === "MISSING") {
     return {
       isCloudflare: true,
-      riskLevel: "HIGH_RISK",
+      riskLevel: "WARNING",
       googleExtendedStatus: "MISSING",
-      scoreDelta: -15,
-      headline: "Cloudflare site missing Google-Extended — at risk from September 15 change",
+      scoreDelta: 0,
+      headline: "You're behind Cloudflare — check your AI bot settings before Tuesday, September 15",
       detail:
-        "This site is behind Cloudflare but has no Google-Extended entry in robots.txt. On September 15, 2026, Cloudflare changes how its AI crawler blocking works: the 'Block AI bots' preset will also block Googlebot (not just AI training crawlers). Without Google-Extended, you have no targeted opt-out from Google's AI training — your only options are to let Google train on your content or block Googlebot entirely (losing ~88% of referral traffic). Add Google-Extended now to opt out of AI training while keeping Google Search working.",
-      remediation: HIGH_RISK_REMEDIATION,
+        "This site is proxied through Cloudflare. On Tuesday, September 15, 2026, Cloudflare's AI crawler blocking starts categorising crawlers by all their behaviours — so if the 'Block AI bots' preset is on for this site, it will also block Googlebot, not just AI training crawlers. We cannot see your Cloudflare dashboard settings from outside, so this is a heads-up, not a penalty: open Security → Bots and check. Either way, adding Google-Extended to robots.txt gives you a targeted opt-out from Google's AI training that leaves Google Search crawling untouched.",
+      remediation: WARNING_REMEDIATION,
     };
   }
 
@@ -214,7 +226,7 @@ export function checkCloudflareConfiguration(
       scoreDelta: 0,
       headline: "Google-Extended is set to Allow — AI training is explicitly permitted",
       detail:
-        "Your robots.txt has an Allow: / rule under Google-Extended, which explicitly permits Google to use your content for AI training. This is a deliberate choice. After September 15, Cloudflare's AI blocking change may still affect Googlebot if you have a blanket AI block enabled — but since you've allowed Google-Extended, you likely intend for Google to access your content for both search and training.",
+        "Your robots.txt has an Allow: / rule under Google-Extended, which explicitly permits Google to use your content for AI training. This is a deliberate choice. After Tuesday, September 15, Cloudflare's AI blocking change may still affect Googlebot if you have a blanket AI block enabled — check Security → Bots in your dashboard to be sure.",
       remediation: null,
     };
   }
@@ -225,10 +237,10 @@ export function checkCloudflareConfiguration(
     isCloudflare: true,
     riskLevel: "GOOD",
     googleExtendedStatus: "CORRECT",
-    scoreDelta: 5,
+    scoreDelta: 0,
     headline: "Cloudflare configured correctly — Google-Extended is set",
     detail:
-      "This site is behind Cloudflare and has Google-Extended with Disallow: / in robots.txt. This is the correct configuration: it opts out of Google's Gemini AI training without affecting Google Search indexing. The September 15 Cloudflare AI crawler blocking change will not harm your search traffic because Google-Extended provides the targeted opt-out that the blanket 'Block AI bots' preset cannot.",
+      "This site is behind Cloudflare and has Google-Extended with Disallow: / in robots.txt. This is the correct configuration: it opts out of Google's Gemini AI training without affecting Google Search indexing. If your 'Block AI bots' preset is on, the September 15 change will still block other AI crawlers while Google-Extended keeps Google's training pipeline out — and Googlebot keeps crawling for search.",
     remediation: null,
   };
 }
