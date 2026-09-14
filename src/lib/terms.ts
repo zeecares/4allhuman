@@ -60,6 +60,90 @@ export interface ParsedTermsTxt {
 
 // ── parser ─────────────────────────────────────────────────────────────────
 
+/** Header fields, before the first Path block. */
+function applyHeaderField(
+  result: ParsedTermsTxt,
+  field: string,
+  value: string,
+  tok: string[],
+): void {
+  if (field === "version") result.version = Number(value) || null;
+  else if (field === "terms-id") result.termsId = value;
+  else if (field === "receipt-keys") result.receiptKeys = value;
+  else if (field === "payment") {
+    result.payment.methods.push(tok[0]);
+    if (tok[1]) result.payment.settlement = tok[1];
+  } else result.errors.push(`unknown header field "${field}"`);
+}
+
+/** `Unsigned: allow|challenge|deny` inside a Path block. */
+function applyUnsigned(block: TermsPathBlock, value: string, errors: string[]): void {
+  if (value === "allow" || value === "challenge" || value === "deny") block.unsigned = value;
+  else errors.push(`bad Unsigned value "${value}"`);
+}
+
+interface TermsLine {
+  field: string;
+  value: string;
+  tok: string[];
+}
+
+/**
+ * Split a raw line into field, value, and tokens. Returns null for blank or
+ * comment-only lines; malformed lines are recorded in `errors` and skipped,
+ * so one bad line never sinks the report.
+ */
+function splitTermsLine(raw: string, errors: string[]): TermsLine | null {
+  const line = raw.replace(/#.*$/, "").trim();
+  if (!line) return null;
+  const c = line.indexOf(":");
+  if (c < 0) {
+    errors.push(`bad line (no field): "${raw.trim()}"`);
+    return null;
+  }
+  const value = line.slice(c + 1).trim();
+  return { field: line.slice(0, c).trim().toLowerCase(), value, tok: value.split(/\s+/) };
+}
+
+/** Walk the qualifier tokens of a Purpose line (price, use=, delegation=) onto the rule. */
+function applyRuleTokens(rule: TermsPurposeRule, name: string, rest: string[], errors: string[]): void {
+  for (let i = 0; i < rest.length; i++) {
+    const t = rest[i];
+    if (/^\d/.test(t)) {
+      const [currency, unit] = (rest[++i] ?? "").split("/");
+      rule.price = { amount: Number(t), currency: currency || "USD", unit: unit || "request" };
+    } else if (t.startsWith("use=")) rule.use = t.slice(4);
+    else if (t.startsWith("delegation=")) rule.delegation = t.slice(11);
+    else errors.push(`unknown token "${t}" on ${name} line`);
+  }
+}
+
+/**
+ * Build a purpose rule from the tokens after `Purpose:`. Returns null (with
+ * the reason recorded in `errors`) when the line cannot produce a rule.
+ */
+function parsePurposeRule(
+  tok: string[],
+  errors: string[],
+): [TermsPurpose, TermsPurposeRule] | null {
+  const [name, decision, ...rest] = tok;
+  if (!TERMS_PURPOSES.includes(name as TermsPurpose)) {
+    errors.push(`unknown purpose "${name}"`);
+    return null;
+  }
+  if (decision !== "allow" && decision !== "charge" && decision !== "deny") {
+    errors.push(`bad decision "${decision ?? ""}" for ${name}`);
+    return null;
+  }
+  const rule: TermsPurposeRule = { decision };
+  applyRuleTokens(rule, name, rest, errors);
+  if (decision === "charge" && !rule.price) {
+    errors.push(`charge without a price for ${name}`);
+    return null;
+  }
+  return [name as TermsPurpose, rule];
+}
+
 /**
  * Parse terms.txt content. Returns null only when the file has no usable
  * Path block at all; everything else is reported in `errors`.
@@ -76,75 +160,27 @@ export function parseTermsTxt(text: string): ParsedTermsTxt | null {
   let current: TermsPathBlock | null = null;
 
   for (const raw of text.split(/\r?\n/)) {
-    const line = raw.replace(/#.*$/, "").trim();
+    const line = splitTermsLine(raw, result.errors);
     if (!line) continue;
-    const c = line.indexOf(":");
-    if (c < 0) {
-      result.errors.push(`bad line (no field): "${raw.trim()}"`);
-      continue;
-    }
-    const field = line.slice(0, c).trim().toLowerCase();
-    const value = line.slice(c + 1).trim();
-    const tok = value.split(/\s+/);
+    const { field, value, tok } = line;
 
     if (field === "path") {
       current = { path: tok[0] ?? "/", unsigned: "allow", purposes: {} };
       result.blocks.push(current);
-      continue;
+    } else if (!current) {
+      applyHeaderField(result, field, value, tok);
+    } else if (field === "unsigned") {
+      applyUnsigned(current, value, result.errors);
+    } else if (field === "purpose") {
+      const rule = parsePurposeRule(tok, result.errors);
+      if (rule) current.purposes[rule[0]] = rule[1];
+    } else {
+      result.errors.push(`unknown field "${field}" in Path block`);
     }
-
-    if (!current) {
-      // Header fields, before the first Path block.
-      if (field === "version") result.version = Number(value) || null;
-      else if (field === "terms-id") result.termsId = value;
-      else if (field === "receipt-keys") result.receiptKeys = value;
-      else if (field === "payment") {
-        result.payment.methods.push(tok[0]);
-        if (tok[1]) result.payment.settlement = tok[1];
-      } else result.errors.push(`unknown header field "${field}"`);
-      continue;
-    }
-
-    if (field === "unsigned") {
-      if (value === "allow" || value === "challenge" || value === "deny") current.unsigned = value;
-      else result.errors.push(`bad Unsigned value "${value}"`);
-      continue;
-    }
-
-    if (field === "purpose") {
-      const [name, decision, ...rest] = tok;
-      if (!TERMS_PURPOSES.includes(name as TermsPurpose)) {
-        result.errors.push(`unknown purpose "${name}"`);
-        continue;
-      }
-      if (decision !== "allow" && decision !== "charge" && decision !== "deny") {
-        result.errors.push(`bad decision "${decision ?? ""}" for ${name}`);
-        continue;
-      }
-      const rule: TermsPurposeRule = { decision };
-      for (let i = 0; i < rest.length; i++) {
-        const t = rest[i];
-        if (/^\d/.test(t)) {
-          const [currency, unit] = (rest[++i] ?? "").split("/");
-          rule.price = { amount: Number(t), currency: currency || "USD", unit: unit || "request" };
-        } else if (t.startsWith("use=")) rule.use = t.slice(4);
-        else if (t.startsWith("delegation=")) rule.delegation = t.slice(11);
-        else result.errors.push(`unknown token "${t}" on ${name} line`);
-      }
-      if (decision === "charge" && !rule.price) {
-        result.errors.push(`charge without a price for ${name}`);
-        continue;
-      }
-      current.purposes[name as TermsPurpose] = rule;
-      continue;
-    }
-
-    result.errors.push(`unknown field "${field}" in Path block`);
   }
 
   return result.blocks.length > 0 ? result : null;
 }
-
 // ── adjacent enforcement signals ───────────────────────────────────────────
 
 /**
