@@ -1,23 +1,1720 @@
 {
   "schema": 1,
   "tool": "code-erosion",
-  "created": "2026-09-13T00:00:00Z",
-  "note": "Seed baseline from the 2026-09-13 R3 scan of 4allhuman @01f5863 (repo-level numbers exact; SLOC approximate; top-5 high-CC functions only). Refresh with `code-erosion . --write-baseline .code-erosion.json` on the next PR to get full per-file/per-function detail.",
+  "created": "2026-09-14T08:46:45Z",
   "metrics": {
-    "verbosity": 0.084,
-    "erosion": 0.683,
-    "total_loc": 5800,
-    "files_scanned": 36,
-    "total_functions": 0,
-    "high_cc_functions": 5
+    "verbosity": 0.12859819451541474,
+    "erosion": 0.529521372552503,
+    "total_loc": 5871,
+    "files_scanned": 43,
+    "total_functions": 455,
+    "high_cc_functions": 21
   },
-  "files": {},
+  "files": {
+    "bin/4allhuman.ts": {
+      "sloc": 10,
+      "verbosity": 0.0
+    },
+    "next.config.mjs": {
+      "sloc": 16,
+      "verbosity": 0.75
+    },
+    "src/app/api/canary/route.ts": {
+      "sloc": 32,
+      "verbosity": 0.0
+    },
+    "src/app/api/commoncrawl/route.ts": {
+      "sloc": 61,
+      "verbosity": 0.0492
+    },
+    "src/app/api/protect/route.ts": {
+      "sloc": 19,
+      "verbosity": 0.0
+    },
+    "src/app/api/radar/route.ts": {
+      "sloc": 47,
+      "verbosity": 0.0
+    },
+    "src/app/api/timeline/route.ts": {
+      "sloc": 111,
+      "verbosity": 0.0541
+    },
+    "src/app/api/verify/route.ts": {
+      "sloc": 93,
+      "verbosity": 0.0
+    },
+    "src/app/blog/[slug]/page.tsx": {
+      "sloc": 122,
+      "verbosity": 0.0902
+    },
+    "src/app/blog/page.tsx": {
+      "sloc": 61,
+      "verbosity": 0.1311
+    },
+    "src/app/layout.tsx": {
+      "sloc": 41,
+      "verbosity": 0.6585
+    },
+    "src/app/page.tsx": {
+      "sloc": 128,
+      "verbosity": 0.9609
+    },
+    "src/app/security-policy/page.tsx": {
+      "sloc": 125,
+      "verbosity": 0.952
+    },
+    "src/cli.ts": {
+      "sloc": 191,
+      "verbosity": 0.0
+    },
+    "src/components/CanarySection.tsx": {
+      "sloc": 172,
+      "verbosity": 0.0814
+    },
+    "src/components/CloudflareCheckCard.tsx": {
+      "sloc": 105,
+      "verbosity": 0.0
+    },
+    "src/components/RadarSection.tsx": {
+      "sloc": 318,
+      "verbosity": 0.0
+    },
+    "src/components/ScanSection.tsx": {
+      "sloc": 403,
+      "verbosity": 0.402
+    },
+    "src/components/TimelineSection.tsx": {
+      "sloc": 149,
+      "verbosity": 0.0671
+    },
+    "src/components/scan-types.ts": {
+      "sloc": 126,
+      "verbosity": 0.0
+    },
+    "src/components/ui.tsx": {
+      "sloc": 44,
+      "verbosity": 0.5227
+    },
+    "src/content/blog/posts.ts": {
+      "sloc": 88,
+      "verbosity": 0.0682
+    },
+    "src/lib/canary.ts": {
+      "sloc": 69,
+      "verbosity": 0.0435
+    },
+    "src/lib/cloudflare.ts": {
+      "sloc": 154,
+      "verbosity": 0.0
+    },
+    "src/lib/crawlers.generated.ts": {
+      "sloc": 182,
+      "verbosity": 0.0
+    },
+    "src/lib/crawlers.ts": {
+      "sloc": 26,
+      "verbosity": 0.0
+    },
+    "src/lib/generator.ts": {
+      "sloc": 94,
+      "verbosity": 0.3936
+    },
+    "src/lib/layers.ts": {
+      "sloc": 360,
+      "verbosity": 0.225
+    },
+    "src/lib/radar.ts": {
+      "sloc": 257,
+      "verbosity": 0.0739
+    },
+    "src/lib/robots9309.ts": {
+      "sloc": 207,
+      "verbosity": 0.0
+    },
+    "src/lib/scanner.ts": {
+      "sloc": 163,
+      "verbosity": 0.0
+    },
+    "src/lib/terms.ts": {
+      "sloc": 193,
+      "verbosity": 0.0
+    },
+    "src/lib/timeline.ts": {
+      "sloc": 247,
+      "verbosity": 0.085
+    },
+    "tests/canary.test.ts": {
+      "sloc": 63,
+      "verbosity": 0.0
+    },
+    "tests/cli.test.ts": {
+      "sloc": 239,
+      "verbosity": 0.1925
+    },
+    "tests/cloudflare.test.ts": {
+      "sloc": 137,
+      "verbosity": 0.1606
+    },
+    "tests/layers.test.ts": {
+      "sloc": 147,
+      "verbosity": 0.0
+    },
+    "tests/robots9309.test.ts": {
+      "sloc": 197,
+      "verbosity": 0.0
+    },
+    "tests/site-artifacts.test.ts": {
+      "sloc": 47,
+      "verbosity": 0.0
+    },
+    "tests/terms.test.ts": {
+      "sloc": 112,
+      "verbosity": 0.0
+    },
+    "tests/timeline.test.ts": {
+      "sloc": 262,
+      "verbosity": 0.0
+    },
+    "update-crawlers.mjs": {
+      "sloc": 104,
+      "verbosity": 0.0
+    },
+    "wiki-viewer/serve.py": {
+      "sloc": 149,
+      "verbosity": 0.0134
+    }
+  },
   "functions": {
-    "src/app/page.tsx::Home": {"cc": 120, "sloc": 1079, "mass": 3941.8, "high": true, "line": 327},
-    "src/lib/terms.ts::parseTermsTxt": {"cc": 33, "sloc": 72, "mass": 280.0, "high": true, "line": 67},
-    "wiki-viewer/serve.py::render_markdown": {"cc": 33, "sloc": 59, "mass": 253.5, "high": true, "line": 66},
-    "src/app/page.tsx::CloudflareCheckCard": {"cc": 19, "sloc": 103, "mass": 192.8, "high": true, "line": 210},
-    "src/app/api/verify/route.ts::POST": {"cc": 19, "sloc": 75, "mass": 164.5, "high": true, "line": 33}
+    "bin/4allhuman.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 1,
+      "mass": 1.0,
+      "high": false,
+      "line": 12
+    },
+    "next.config.mjs::headers": {
+      "cc": 1,
+      "sloc": 12,
+      "mass": 3.5,
+      "high": false,
+      "line": 7
+    },
+    "src/app/api/canary/route.ts::POST": {
+      "cc": 10,
+      "sloc": 29,
+      "mass": 53.9,
+      "high": false,
+      "line": 15
+    },
+    "src/app/api/commoncrawl/route.ts::getCrawls": {
+      "cc": 4,
+      "sloc": 10,
+      "mass": 12.6,
+      "high": false,
+      "line": 11
+    },
+    "src/app/api/commoncrawl/route.ts::GET": {
+      "cc": 13,
+      "sloc": 45,
+      "mass": 87.2,
+      "high": true,
+      "line": 27
+    },
+    "src/app/api/commoncrawl/route.ts::<anonymous>": {
+      "cc": 6,
+      "sloc": 16,
+      "mass": 24.0,
+      "high": false,
+      "line": 36
+    },
+    "src/app/api/protect/route.ts::POST": {
+      "cc": 5,
+      "sloc": 15,
+      "mass": 19.4,
+      "high": false,
+      "line": 7
+    },
+    "src/app/api/radar/route.ts::POST": {
+      "cc": 9,
+      "sloc": 44,
+      "mass": 59.7,
+      "high": false,
+      "line": 12
+    },
+    "src/app/api/timeline/route.ts::fetchText": {
+      "cc": 4,
+      "sloc": 14,
+      "mass": 15.0,
+      "high": false,
+      "line": 35
+    },
+    "src/app/api/timeline/route.ts::cdxCapture": {
+      "cc": 4,
+      "sloc": 12,
+      "mass": 13.9,
+      "high": false,
+      "line": 56
+    },
+    "src/app/api/timeline/route.ts::nowTimestamp": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 70
+    },
+    "src/app/api/timeline/route.ts::GET": {
+      "cc": 11,
+      "sloc": 62,
+      "mass": 86.6,
+      "high": true,
+      "line": 79
+    },
+    "src/app/api/timeline/route.ts::<anonymous>": {
+      "cc": 3,
+      "sloc": 6,
+      "mass": 7.3,
+      "high": false,
+      "line": 106
+    },
+    "src/app/api/verify/route.ts::POST": {
+      "cc": 19,
+      "sloc": 75,
+      "mass": 164.5,
+      "high": true,
+      "line": 33
+    },
+    "src/app/api/verify/route.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 1,
+      "mass": 1.0,
+      "high": false,
+      "line": 55
+    },
+    "src/app/blog/[slug]/page.tsx::generateStaticParams": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 15
+    },
+    "src/app/blog/[slug]/page.tsx::<anonymous>": {
+      "cc": 1,
+      "sloc": 5,
+      "mass": 2.2,
+      "high": false,
+      "line": 108
+    },
+    "src/app/blog/[slug]/page.tsx::generateMetadata": {
+      "cc": 2,
+      "sloc": 20,
+      "mass": 8.9,
+      "high": false,
+      "line": 20
+    },
+    "src/app/blog/[slug]/page.tsx::formatDate": {
+      "cc": 1,
+      "sloc": 8,
+      "mass": 2.8,
+      "high": false,
+      "line": 42
+    },
+    "src/app/blog/[slug]/page.tsx::Block": {
+      "cc": 8,
+      "sloc": 38,
+      "mass": 49.3,
+      "high": false,
+      "line": 52
+    },
+    "src/app/blog/[slug]/page.tsx::BlogPostPage": {
+      "cc": 2,
+      "sloc": 42,
+      "mass": 13.0,
+      "high": false,
+      "line": 91
+    },
+    "src/app/blog/page.tsx::formatDate": {
+      "cc": 1,
+      "sloc": 8,
+      "mass": 2.8,
+      "high": false,
+      "line": 11
+    },
+    "src/app/blog/page.tsx::BlogIndex": {
+      "cc": 1,
+      "sloc": 45,
+      "mass": 6.7,
+      "high": false,
+      "line": 20
+    },
+    "src/app/blog/page.tsx::<anonymous>": {
+      "cc": 1,
+      "sloc": 22,
+      "mass": 4.7,
+      "high": false,
+      "line": 36
+    },
+    "src/app/layout.tsx::RootLayout": {
+      "cc": 1,
+      "sloc": 27,
+      "mass": 5.2,
+      "high": false,
+      "line": 24
+    },
+    "src/app/page.tsx::Home": {
+      "cc": 1,
+      "sloc": 123,
+      "mass": 11.1,
+      "high": false,
+      "line": 8
+    },
+    "src/app/security-policy/page.tsx::SecurityPolicyPage": {
+      "cc": 1,
+      "sloc": 119,
+      "mass": 10.9,
+      "high": false,
+      "line": 9
+    },
+    "src/cli.ts::readFlagValue": {
+      "cc": 4,
+      "sloc": 8,
+      "mass": 11.3,
+      "high": false,
+      "line": 53
+    },
+    "src/cli.ts::parseScore": {
+      "cc": 4,
+      "sloc": 7,
+      "mass": 10.6,
+      "high": false,
+      "line": 62
+    },
+    "src/cli.ts::parseTimeout": {
+      "cc": 3,
+      "sloc": 7,
+      "mass": 7.9,
+      "high": false,
+      "line": 70
+    },
+    "src/cli.ts::parseArgs": {
+      "cc": 21,
+      "sloc": 51,
+      "mass": 150.0,
+      "high": true,
+      "line": 78
+    },
+    "src/cli.ts::statusLabel": {
+      "cc": 5,
+      "sloc": 12,
+      "mass": 17.3,
+      "high": false,
+      "line": 134
+    },
+    "src/cli.ts::formatReport": {
+      "cc": 4,
+      "sloc": 21,
+      "mass": 18.3,
+      "high": false,
+      "line": 148
+    },
+    "src/cli.ts::runCli": {
+      "cc": 16,
+      "sloc": 57,
+      "mass": 120.8,
+      "high": true,
+      "line": 179
+    },
+    "src/cli.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 1,
+      "mass": 1.0,
+      "high": false,
+      "line": 180
+    },
+    "src/components/CanarySection.tsx::CanarySection": {
+      "cc": 21,
+      "sloc": 169,
+      "mass": 273.0,
+      "high": true,
+      "line": 6
+    },
+    "src/components/CanarySection.tsx::mintCanary": {
+      "cc": 6,
+      "sloc": 23,
+      "mass": 28.8,
+      "high": false,
+      "line": 14
+    },
+    "src/components/CanarySection.tsx::checkCanaryAnswer": {
+      "cc": 7,
+      "sloc": 17,
+      "mass": 28.9,
+      "high": false,
+      "line": 38
+    },
+    "src/components/CanarySection.tsx::downloadCanaryRecord": {
+      "cc": 2,
+      "sloc": 27,
+      "mass": 10.4,
+      "high": false,
+      "line": 56
+    },
+    "src/components/CanarySection.tsx::<anonymous>": {
+      "cc": 1,
+      "sloc": 11,
+      "mass": 3.3,
+      "high": false,
+      "line": 137
+    },
+    "src/components/CloudflareCheckCard.tsx::CloudflareCheckCard": {
+      "cc": 19,
+      "sloc": 103,
+      "mass": 192.8,
+      "high": true,
+      "line": 15
+    },
+    "src/components/CloudflareCheckCard.tsx::<anonymous>": {
+      "cc": 2,
+      "sloc": 31,
+      "mass": 11.1,
+      "high": false,
+      "line": 80
+    },
+    "src/components/RadarSection.tsx::RadarSection": {
+      "cc": 31,
+      "sloc": 213,
+      "mass": 452.4,
+      "high": true,
+      "line": 10
+    },
+    "src/components/RadarSection.tsx::generateProbes": {
+      "cc": 7,
+      "sloc": 21,
+      "mass": 32.1,
+      "high": false,
+      "line": 20
+    },
+    "src/components/RadarSection.tsx::analyzeResponses": {
+      "cc": 6,
+      "sloc": 11,
+      "mass": 19.9,
+      "high": false,
+      "line": 43
+    },
+    "src/components/RadarSection.tsx::downloadEvidencePack": {
+      "cc": 3,
+      "sloc": 24,
+      "mass": 14.7,
+      "high": false,
+      "line": 55
+    },
+    "src/components/RadarSection.tsx::<anonymous>": {
+      "cc": 5,
+      "sloc": 44,
+      "mass": 33.2,
+      "high": false,
+      "line": 283
+    },
+    "src/components/RadarSection.tsx::MemorizationProbe": {
+      "cc": 12,
+      "sloc": 100,
+      "mass": 120.0,
+      "high": true,
+      "line": 248
+    },
+    "src/components/RadarSection.tsx::generateMcq": {
+      "cc": 2,
+      "sloc": 6,
+      "mass": 4.9,
+      "high": false,
+      "line": 253
+    },
+    "src/components/RadarSection.tsx::analyzeMcq": {
+      "cc": 2,
+      "sloc": 4,
+      "mass": 4.0,
+      "high": false,
+      "line": 260
+    },
+    "src/components/ScanSection.tsx::hostnameOf": {
+      "cc": 2,
+      "sloc": 7,
+      "mass": 5.3,
+      "high": false,
+      "line": 13
+    },
+    "src/components/ScanSection.tsx::ScanSection": {
+      "cc": 12,
+      "sloc": 79,
+      "mass": 106.7,
+      "high": true,
+      "line": 22
+    },
+    "src/components/ScanSection.tsx::runScan": {
+      "cc": 5,
+      "sloc": 19,
+      "mass": 21.8,
+      "high": false,
+      "line": 28
+    },
+    "src/components/ScanSection.tsx::handleScan": {
+      "cc": 1,
+      "sloc": 4,
+      "mass": 2.0,
+      "high": false,
+      "line": 48
+    },
+    "src/components/ScanSection.tsx::<anonymous>": {
+      "cc": 3,
+      "sloc": 15,
+      "mass": 11.6,
+      "high": false,
+      "line": 189
+    },
+    "src/components/ScanSection.tsx::ScanResults": {
+      "cc": 8,
+      "sloc": 138,
+      "mass": 94.0,
+      "high": false,
+      "line": 115
+    },
+    "src/components/ScanSection.tsx::CorpusCard": {
+      "cc": 15,
+      "sloc": 74,
+      "mass": 129.0,
+      "high": true,
+      "line": 275
+    },
+    "src/components/ScanSection.tsx::checkCommonCrawl": {
+      "cc": 7,
+      "sloc": 17,
+      "mass": 28.9,
+      "high": false,
+      "line": 281
+    },
+    "src/components/ScanSection.tsx::VerifyCard": {
+      "cc": 8,
+      "sloc": 96,
+      "mass": 78.4,
+      "high": false,
+      "line": 357
+    },
+    "src/components/ScanSection.tsx::handleVerify": {
+      "cc": 5,
+      "sloc": 19,
+      "mass": 21.8,
+      "high": false,
+      "line": 371
+    },
+    "src/components/TimelineSection.tsx::TimelineSection": {
+      "cc": 20,
+      "sloc": 146,
+      "mass": 241.7,
+      "high": true,
+      "line": 6
+    },
+    "src/components/TimelineSection.tsx::buildTimeline": {
+      "cc": 6,
+      "sloc": 17,
+      "mass": 24.7,
+      "high": false,
+      "line": 12
+    },
+    "src/components/TimelineSection.tsx::downloadReservationRecord": {
+      "cc": 2,
+      "sloc": 9,
+      "mass": 6.0,
+      "high": false,
+      "line": 30
+    },
+    "src/components/TimelineSection.tsx::<anonymous>": {
+      "cc": 1,
+      "sloc": 8,
+      "mass": 2.8,
+      "high": false,
+      "line": 84
+    },
+    "src/components/ui.tsx::scoreClass": {
+      "cc": 3,
+      "sloc": 5,
+      "mass": 6.7,
+      "high": false,
+      "line": 4
+    },
+    "src/components/ui.tsx::CopyButton": {
+      "cc": 2,
+      "sloc": 15,
+      "mass": 7.7,
+      "high": false,
+      "line": 10
+    },
+    "src/components/ui.tsx::<anonymous>": {
+      "cc": 1,
+      "sloc": 5,
+      "mass": 2.2,
+      "high": false,
+      "line": 15
+    },
+    "src/components/ui.tsx::EvidenceLink": {
+      "cc": 1,
+      "sloc": 6,
+      "mass": 2.4,
+      "high": false,
+      "line": 27
+    },
+    "src/components/ui.tsx::SkeletonCard": {
+      "cc": 1,
+      "sloc": 17,
+      "mass": 4.1,
+      "high": false,
+      "line": 35
+    },
+    "src/content/blog/posts.ts::getPostBySlug": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 97
+    },
+    "src/content/blog/posts.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 1,
+      "mass": 1.0,
+      "high": false,
+      "line": 98
+    },
+    "src/content/blog/posts.ts::getAllSlugs": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 102
+    },
+    "src/lib/canary.ts::fnv1a": {
+      "cc": 2,
+      "sloc": 8,
+      "mass": 5.7,
+      "high": false,
+      "line": 23
+    },
+    "src/lib/canary.ts::makeCanaryId": {
+      "cc": 1,
+      "sloc": 5,
+      "mass": 2.2,
+      "high": false,
+      "line": 33
+    },
+    "src/lib/canary.ts::todayUtc": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 40
+    },
+    "src/lib/canary.ts::buildCanaryArtifacts": {
+      "cc": 1,
+      "sloc": 21,
+      "mass": 4.6,
+      "high": false,
+      "line": 61
+    },
+    "src/lib/canary.ts::checkCanary": {
+      "cc": 5,
+      "sloc": 18,
+      "mass": 21.2,
+      "high": false,
+      "line": 94
+    },
+    "src/lib/cloudflare.ts::detectCloudflare": {
+      "cc": 6,
+      "sloc": 12,
+      "mass": 20.8,
+      "high": false,
+      "line": 57
+    },
+    "src/lib/cloudflare.ts::<anonymous>": {
+      "cc": 2,
+      "sloc": 5,
+      "mass": 4.5,
+      "high": false,
+      "line": 58
+    },
+    "src/lib/cloudflare.ts::classifyGoogleExtended": {
+      "cc": 9,
+      "sloc": 19,
+      "mass": 39.2,
+      "high": false,
+      "line": 87
+    },
+    "src/lib/cloudflare.ts::checkCloudflareConfiguration": {
+      "cc": 5,
+      "sloc": 84,
+      "mass": 45.8,
+      "high": false,
+      "line": 147
+    },
+    "src/lib/generator.ts::generateRobotsSnippet": {
+      "cc": 3,
+      "sloc": 11,
+      "mass": 9.9,
+      "high": false,
+      "line": 21
+    },
+    "src/lib/generator.ts::generateAiTxt": {
+      "cc": 1,
+      "sloc": 15,
+      "mass": 3.9,
+      "high": false,
+      "line": 34
+    },
+    "src/lib/generator.ts::generateMetaTags": {
+      "cc": 1,
+      "sloc": 6,
+      "mass": 2.4,
+      "high": false,
+      "line": 50
+    },
+    "src/lib/generator.ts::generateLegalNotice": {
+      "cc": 1,
+      "sloc": 9,
+      "mass": 3.0,
+      "high": false,
+      "line": 59
+    },
+    "src/lib/generator.ts::generateRsl": {
+      "cc": 1,
+      "sloc": 13,
+      "mass": 3.6,
+      "high": false,
+      "line": 74
+    },
+    "src/lib/generator.ts::generateAllArtifacts": {
+      "cc": 3,
+      "sloc": 15,
+      "mass": 11.6,
+      "high": false,
+      "line": 88
+    },
+    "src/lib/generator.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 1,
+      "mass": 1.0,
+      "high": false,
+      "line": 91
+    },
+    "src/lib/generator.ts::scoreFromScan": {
+      "cc": 3,
+      "sloc": 14,
+      "mass": 11.2,
+      "high": false,
+      "line": 117
+    },
+    "src/lib/layers.ts::<anonymous>": {
+      "cc": 2,
+      "sloc": 1,
+      "mass": 2.0,
+      "high": false,
+      "line": 109
+    },
+    "src/lib/layers.ts::parseXRobotsTag": {
+      "cc": 5,
+      "sloc": 16,
+      "mass": 20.0,
+      "high": false,
+      "line": 71
+    },
+    "src/lib/layers.ts::headersLayer": {
+      "cc": 8,
+      "sloc": 54,
+      "mass": 58.8,
+      "high": false,
+      "line": 94
+    },
+    "src/lib/layers.ts::extractMetaTags": {
+      "cc": 6,
+      "sloc": 12,
+      "mass": 20.8,
+      "high": false,
+      "line": 151
+    },
+    "src/lib/layers.ts::metaLayer": {
+      "cc": 4,
+      "sloc": 26,
+      "mass": 20.4,
+      "high": false,
+      "line": 164
+    },
+    "src/lib/layers.ts::detectTdmRep": {
+      "cc": 16,
+      "sloc": 31,
+      "mass": 89.1,
+      "high": true,
+      "line": 202
+    },
+    "src/lib/layers.ts::tdmRepLayer": {
+      "cc": 4,
+      "sloc": 39,
+      "mass": 25.0,
+      "high": false,
+      "line": 234
+    },
+    "src/lib/layers.ts::aiTxtLayer": {
+      "cc": 7,
+      "sloc": 29,
+      "mass": 37.7,
+      "high": false,
+      "line": 276
+    },
+    "src/lib/layers.ts::llmsTxtLayer": {
+      "cc": 3,
+      "sloc": 15,
+      "mass": 11.6,
+      "high": false,
+      "line": 308
+    },
+    "src/lib/layers.ts::detectAiPref": {
+      "cc": 4,
+      "sloc": 9,
+      "mass": 12.0,
+      "high": false,
+      "line": 332
+    },
+    "src/lib/layers.ts::aiPrefLayer": {
+      "cc": 5,
+      "sloc": 27,
+      "mass": 26.0,
+      "high": false,
+      "line": 342
+    },
+    "src/lib/layers.ts::robotsLayer": {
+      "cc": 7,
+      "sloc": 39,
+      "mass": 43.7,
+      "high": false,
+      "line": 372
+    },
+    "src/lib/layers.ts::reachableLayer": {
+      "cc": 4,
+      "sloc": 13,
+      "mass": 14.4,
+      "high": false,
+      "line": 412
+    },
+    "src/lib/layers.ts::scoreFromLayers": {
+      "cc": 1,
+      "sloc": 9,
+      "mass": 3.0,
+      "high": false,
+      "line": 428
+    },
+    "src/lib/radar.ts::htmlToText": {
+      "cc": 1,
+      "sloc": 13,
+      "mass": 3.6,
+      "high": false,
+      "line": 18
+    },
+    "src/lib/radar.ts::tokenize": {
+      "cc": 2,
+      "sloc": 3,
+      "mass": 3.5,
+      "high": false,
+      "line": 32
+    },
+    "src/lib/radar.ts::topKeywords": {
+      "cc": 5,
+      "sloc": 11,
+      "mass": 16.6,
+      "high": false,
+      "line": 37
+    },
+    "src/lib/radar.ts::<anonymous>": {
+      "cc": 5,
+      "sloc": 27,
+      "mass": 26.0,
+      "high": false,
+      "line": 264
+    },
+    "src/lib/radar.ts::distinctiveSentences": {
+      "cc": 4,
+      "sloc": 17,
+      "mass": 16.5,
+      "high": false,
+      "line": 53
+    },
+    "src/lib/radar.ts::makeProbes": {
+      "cc": 4,
+      "sloc": 17,
+      "mass": 16.5,
+      "high": false,
+      "line": 75
+    },
+    "src/lib/radar.ts::ngrams": {
+      "cc": 2,
+      "sloc": 5,
+      "mass": 4.5,
+      "high": false,
+      "line": 96
+    },
+    "src/lib/radar.ts::analyzePair": {
+      "cc": 15,
+      "sloc": 42,
+      "mass": 97.2,
+      "high": true,
+      "line": 116
+    },
+    "src/lib/radar.ts::sha256Hex": {
+      "cc": 1,
+      "sloc": 7,
+      "mass": 2.6,
+      "high": false,
+      "line": 167
+    },
+    "src/lib/radar.ts::seededShuffle": {
+      "cc": 3,
+      "sloc": 10,
+      "mass": 9.5,
+      "high": false,
+      "line": 197
+    },
+    "src/lib/radar.ts::hashStr": {
+      "cc": 3,
+      "sloc": 5,
+      "mass": 6.7,
+      "high": false,
+      "line": 208
+    },
+    "src/lib/radar.ts::paraphrase": {
+      "cc": 10,
+      "sloc": 27,
+      "mass": 52.0,
+      "high": false,
+      "line": 216
+    },
+    "src/lib/radar.ts::variantFor": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 248
+    },
+    "src/lib/radar.ts::makeMcq": {
+      "cc": 5,
+      "sloc": 33,
+      "mass": 28.7,
+      "high": false,
+      "line": 259
+    },
+    "src/lib/radar.ts::scoreMcq": {
+      "cc": 4,
+      "sloc": 22,
+      "mass": 18.8,
+      "high": false,
+      "line": 304
+    },
+    "src/lib/robots9309.ts::decodeOctets": {
+      "cc": 7,
+      "sloc": 26,
+      "mass": 35.7,
+      "high": false,
+      "line": 62
+    },
+    "src/lib/robots9309.ts::<anonymous>": {
+      "cc": 7,
+      "sloc": 24,
+      "mass": 34.3,
+      "high": false,
+      "line": 66
+    },
+    "src/lib/robots9309.ts::parseRobots": {
+      "cc": 14,
+      "sloc": 43,
+      "mass": 91.8,
+      "high": true,
+      "line": 93
+    },
+    "src/lib/robots9309.ts::agentMatches": {
+      "cc": 2,
+      "sloc": 6,
+      "mass": 4.9,
+      "high": false,
+      "line": 152
+    },
+    "src/lib/robots9309.ts::governingGroup": {
+      "cc": 11,
+      "sloc": 37,
+      "mass": 66.9,
+      "high": true,
+      "line": 167
+    },
+    "src/lib/robots9309.ts::patternMatches": {
+      "cc": 3,
+      "sloc": 12,
+      "mass": 10.4,
+      "high": false,
+      "line": 212
+    },
+    "src/lib/robots9309.ts::winningRule": {
+      "cc": 7,
+      "sloc": 20,
+      "mass": 31.3,
+      "high": false,
+      "line": 226
+    },
+    "src/lib/robots9309.ts::isAllowed": {
+      "cc": 3,
+      "sloc": 11,
+      "mass": 9.9,
+      "high": false,
+      "line": 248
+    },
+    "src/lib/robots9309.ts::explain": {
+      "cc": 5,
+      "sloc": 30,
+      "mass": 27.4,
+      "high": false,
+      "line": 264
+    },
+    "src/lib/scanner.ts::normalizeUrl": {
+      "cc": 2,
+      "sloc": 4,
+      "mass": 4.0,
+      "high": false,
+      "line": 67
+    },
+    "src/lib/scanner.ts::fetchText": {
+      "cc": 1,
+      "sloc": 4,
+      "mass": 2.0,
+      "high": false,
+      "line": 84
+    },
+    "src/lib/scanner.ts::fetchPage": {
+      "cc": 4,
+      "sloc": 28,
+      "mass": 21.2,
+      "high": false,
+      "line": 89
+    },
+    "src/lib/scanner.ts::<anonymous>": {
+      "cc": 2,
+      "sloc": 4,
+      "mass": 4.0,
+      "high": false,
+      "line": 108
+    },
+    "src/lib/scanner.ts::evaluateCrawlers": {
+      "cc": 1,
+      "sloc": 11,
+      "mass": 3.3,
+      "high": false,
+      "line": 130
+    },
+    "src/lib/scanner.ts::scanSite": {
+      "cc": 7,
+      "sloc": 63,
+      "mass": 55.6,
+      "high": false,
+      "line": 147
+    },
+    "src/lib/terms.ts::parseTermsTxt": {
+      "cc": 33,
+      "sloc": 72,
+      "mass": 280.0,
+      "high": true,
+      "line": 67
+    },
+    "src/lib/terms.ts::detectTermsSignals": {
+      "cc": 8,
+      "sloc": 21,
+      "mass": 36.7,
+      "high": false,
+      "line": 154
+    },
+    "src/lib/terms.ts::<anonymous>": {
+      "cc": 2,
+      "sloc": 4,
+      "mass": 4.0,
+      "high": false,
+      "line": 158
+    },
+    "src/lib/terms.ts::priceText": {
+      "cc": 2,
+      "sloc": 4,
+      "mass": 4.0,
+      "high": false,
+      "line": 178
+    },
+    "src/lib/terms.ts::summarizePurposes": {
+      "cc": 5,
+      "sloc": 18,
+      "mass": 21.2,
+      "high": false,
+      "line": 184
+    },
+    "src/lib/terms.ts::termsTxtLayer": {
+      "cc": 8,
+      "sloc": 31,
+      "mass": 44.5,
+      "high": false,
+      "line": 207
+    },
+    "src/lib/terms.ts::checkTermsTxt": {
+      "cc": 3,
+      "sloc": 19,
+      "mass": 13.1,
+      "high": false,
+      "line": 255
+    },
+    "src/lib/timeline.ts::parseWaybackCdx": {
+      "cc": 13,
+      "sloc": 28,
+      "mass": 68.8,
+      "high": true,
+      "line": 41
+    },
+    "src/lib/timeline.ts::<anonymous>": {
+      "cc": 4,
+      "sloc": 10,
+      "mass": 12.6,
+      "high": false,
+      "line": 252
+    },
+    "src/lib/timeline.ts::waybackIso": {
+      "cc": 2,
+      "sloc": 6,
+      "mass": 4.9,
+      "high": false,
+      "line": 71
+    },
+    "src/lib/timeline.ts::waybackRawUrl": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 79
+    },
+    "src/lib/timeline.ts::waybackViewUrl": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 84
+    },
+    "src/lib/timeline.ts::reservationIn": {
+      "cc": 3,
+      "sloc": 6,
+      "mass": 7.3,
+      "high": false,
+      "line": 100
+    },
+    "src/lib/timeline.ts::monthCursors": {
+      "cc": 5,
+      "sloc": 13,
+      "mass": 18.0,
+      "high": false,
+      "line": 137
+    },
+    "src/lib/timeline.ts::findFirstReservation": {
+      "cc": 16,
+      "sloc": 52,
+      "mass": 115.4,
+      "high": true,
+      "line": 161
+    },
+    "src/lib/timeline.ts::cmpTime": {
+      "cc": 1,
+      "sloc": 4,
+      "mass": 2.0,
+      "high": false,
+      "line": 237
+    },
+    "src/lib/timeline.ts::classifyCrawls": {
+      "cc": 4,
+      "sloc": 15,
+      "mass": 15.5,
+      "high": false,
+      "line": 248
+    },
+    "src/lib/timeline.ts::summarize": {
+      "cc": 7,
+      "sloc": 21,
+      "mass": 32.1,
+      "high": false,
+      "line": 276
+    },
+    "src/lib/timeline.ts::renderReservationRecord": {
+      "cc": 8,
+      "sloc": 49,
+      "mass": 56.0,
+      "high": false,
+      "line": 304
+    },
+    "tests/canary.test.ts::<anonymous>": {
+      "cc": 2,
+      "sloc": 9,
+      "mass": 6.0,
+      "high": false,
+      "line": 54
+    },
+    "tests/cli.test.ts::layer": {
+      "cc": 1,
+      "sloc": 11,
+      "mass": 3.3,
+      "high": false,
+      "line": 24
+    },
+    "tests/cli.test.ts::fakeScanResult": {
+      "cc": 1,
+      "sloc": 35,
+      "mass": 5.9,
+      "high": false,
+      "line": 36
+    },
+    "tests/cli.test.ts::capture": {
+      "cc": 1,
+      "sloc": 8,
+      "mass": 2.8,
+      "high": false,
+      "line": 73
+    },
+    "tests/cli.test.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 21,
+      "mass": 4.6,
+      "high": false,
+      "line": 147
+    },
+    "tests/cloudflare.test.ts::layer": {
+      "cc": 1,
+      "sloc": 3,
+      "mass": 1.7,
+      "high": false,
+      "line": 33
+    },
+    "tests/cloudflare.test.ts::fakeScan": {
+      "cc": 1,
+      "sloc": 19,
+      "mass": 4.4,
+      "high": false,
+      "line": 37
+    },
+    "tests/cloudflare.test.ts::<anonymous>": {
+      "cc": 2,
+      "sloc": 7,
+      "mass": 5.3,
+      "high": false,
+      "line": 134
+    },
+    "tests/layers.test.ts::<anonymous>": {
+      "cc": 2,
+      "sloc": 8,
+      "mass": 5.7,
+      "high": false,
+      "line": 130
+    },
+    "tests/robots9309.test.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 21,
+      "mass": 4.6,
+      "high": false,
+      "line": 223
+    },
+    "tests/site-artifacts.test.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 8,
+      "mass": 2.8,
+      "high": false,
+      "line": 16
+    },
+    "tests/terms.test.ts::<anonymous>": {
+      "cc": 1,
+      "sloc": 21,
+      "mass": 4.6,
+      "high": false,
+      "line": 39
+    },
+    "tests/timeline.test.ts::<anonymous>": {
+      "cc": 3,
+      "sloc": 14,
+      "mass": 11.2,
+      "high": false,
+      "line": 95
+    },
+    "tests/timeline.test.ts::fakeArchive": {
+      "cc": 3,
+      "sloc": 24,
+      "mass": 14.7,
+      "high": false,
+      "line": 86
+    },
+    "update-crawlers.mjs::stripMarkdown": {
+      "cc": 2,
+      "sloc": 8,
+      "mass": 5.7,
+      "high": false,
+      "line": 58
+    },
+    "update-crawlers.mjs::classifyDualUse": {
+      "cc": 4,
+      "sloc": 4,
+      "mass": 8.0,
+      "high": false,
+      "line": 68
+    },
+    "update-crawlers.mjs::main": {
+      "cc": 14,
+      "sloc": 56,
+      "mass": 104.8,
+      "high": true,
+      "line": 73
+    },
+    "update-crawlers.mjs::<anonymous>": {
+      "cc": 1,
+      "sloc": 4,
+      "mass": 2.0,
+      "high": false,
+      "line": 134
+    },
+    "wiki-viewer/serve.py::build_nav": {
+      "cc": 7,
+      "sloc": 19,
+      "mass": 30.5,
+      "high": false,
+      "line": 31
+    },
+    "wiki-viewer/serve.py::escape": {
+      "cc": 1,
+      "sloc": 2,
+      "mass": 1.4,
+      "high": false,
+      "line": 54
+    },
+    "wiki-viewer/serve.py::inline": {
+      "cc": 1,
+      "sloc": 7,
+      "mass": 2.6,
+      "high": false,
+      "line": 57
+    },
+    "wiki-viewer/serve.py::render_markdown": {
+      "cc": 33,
+      "sloc": 59,
+      "mass": 253.5,
+      "high": true,
+      "line": 66
+    },
+    "wiki-viewer/serve.py::render_table": {
+      "cc": 6,
+      "sloc": 8,
+      "mass": 17.0,
+      "high": false,
+      "line": 143
+    },
+    "wiki-viewer/serve.py::page_html": {
+      "cc": 3,
+      "sloc": 7,
+      "mass": 7.9,
+      "high": false,
+      "line": 153
+    },
+    "wiki-viewer/serve.py::do_GET": {
+      "cc": 5,
+      "sloc": 22,
+      "mass": 23.5,
+      "high": false,
+      "line": 200
+    },
+    "wiki-viewer/serve.py::log_message": {
+      "cc": 1,
+      "sloc": 2,
+      "mass": 1.4,
+      "high": false,
+      "line": 223
+    },
+    "wiki-viewer/serve.py::main": {
+      "cc": 2,
+      "sloc": 9,
+      "mass": 6.0,
+      "high": false,
+      "line": 226
+    }
   },
-  "collisions": []
+  "collisions": [
+    "bin/4allhuman.ts::<anonymous>",
+    "src/app/api/commoncrawl/route.ts::<anonymous>",
+    "src/app/api/commoncrawl/route.ts::<anonymous>",
+    "src/app/api/commoncrawl/route.ts::<anonymous>",
+    "src/app/api/commoncrawl/route.ts::<anonymous>",
+    "src/app/api/timeline/route.ts::<anonymous>",
+    "src/app/api/verify/route.ts::<anonymous>",
+    "src/app/api/verify/route.ts::<anonymous>",
+    "src/app/api/verify/route.ts::<anonymous>",
+    "src/app/api/verify/route.ts::<anonymous>",
+    "src/app/blog/[slug]/page.tsx::<anonymous>",
+    "src/app/blog/[slug]/page.tsx::<anonymous>",
+    "src/app/blog/[slug]/page.tsx::<anonymous>",
+    "src/app/blog/[slug]/page.tsx::<anonymous>",
+    "src/app/blog/page.tsx::<anonymous>",
+    "src/app/blog/page.tsx::<anonymous>",
+    "src/cli.ts::<anonymous>",
+    "src/components/CanarySection.tsx::<anonymous>",
+    "src/components/CanarySection.tsx::<anonymous>",
+    "src/components/CanarySection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/RadarSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/ScanSection.tsx::<anonymous>",
+    "src/components/TimelineSection.tsx::<anonymous>",
+    "src/components/ui.tsx::<anonymous>",
+    "src/components/ui.tsx::<anonymous>",
+    "src/content/blog/posts.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/layers.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/radar.ts::<anonymous>",
+    "src/lib/robots9309.ts::<anonymous>",
+    "src/lib/robots9309.ts::<anonymous>",
+    "src/lib/robots9309.ts::<anonymous>",
+    "src/lib/robots9309.ts::<anonymous>",
+    "src/lib/scanner.ts::<anonymous>",
+    "src/lib/scanner.ts::<anonymous>",
+    "src/lib/scanner.ts::<anonymous>",
+    "src/lib/scanner.ts::<anonymous>",
+    "src/lib/scanner.ts::<anonymous>",
+    "src/lib/scanner.ts::<anonymous>",
+    "src/lib/scanner.ts::<anonymous>",
+    "src/lib/terms.ts::<anonymous>",
+    "src/lib/terms.ts::<anonymous>",
+    "src/lib/terms.ts::<anonymous>",
+    "src/lib/terms.ts::<anonymous>",
+    "src/lib/terms.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "src/lib/timeline.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/canary.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cli.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/cloudflare.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/layers.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/robots9309.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/site-artifacts.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/terms.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "tests/timeline.test.ts::<anonymous>",
+    "update-crawlers.mjs::<anonymous>",
+    "update-crawlers.mjs::<anonymous>",
+    "update-crawlers.mjs::<anonymous>"
+  ]
 }
