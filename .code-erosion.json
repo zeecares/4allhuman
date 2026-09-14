@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "tool": "code-erosion",
-  "created": "2026-09-14T08:46:45Z",
+  "created": "2026-09-14T09:18:05Z",
   "metrics": {
-    "verbosity": 0.12859819451541474,
-    "erosion": 0.529521372552503,
-    "total_loc": 5871,
+    "verbosity": 0.1281618887015177,
+    "erosion": 0.4408702900009268,
+    "total_loc": 5930,
     "files_scanned": 43,
-    "total_functions": 455,
-    "high_cc_functions": 21
+    "total_functions": 472,
+    "high_cc_functions": 18
   },
   "files": {
     "bin/4allhuman.ts": {
@@ -40,8 +40,8 @@
       "verbosity": 0.0541
     },
     "src/app/api/verify/route.ts": {
-      "sloc": 93,
-      "verbosity": 0.0
+      "sloc": 107,
+      "verbosity": 0.0467
     },
     "src/app/blog/[slug]/page.tsx": {
       "sloc": 122,
@@ -136,7 +136,7 @@
       "verbosity": 0.0
     },
     "src/lib/terms.ts": {
-      "sloc": 193,
+      "sloc": 217,
       "verbosity": 0.0
     },
     "src/lib/timeline.ts": {
@@ -180,8 +180,8 @@
       "verbosity": 0.0
     },
     "wiki-viewer/serve.py": {
-      "sloc": 149,
-      "verbosity": 0.0134
+      "sloc": 170,
+      "verbosity": 0.0118
     }
   },
   "functions": {
@@ -276,19 +276,54 @@
       "high": false,
       "line": 106
     },
-    "src/app/api/verify/route.ts::POST": {
-      "cc": 19,
-      "sloc": 75,
-      "mass": 164.5,
-      "high": true,
-      "line": 33
+    "src/app/api/verify/route.ts::blockedCrawlersFrom": {
+      "cc": 2,
+      "sloc": 6,
+      "mass": 4.9,
+      "high": false,
+      "line": 44
     },
     "src/app/api/verify/route.ts::<anonymous>": {
       "cc": 1,
       "sloc": 1,
       "mass": 1.0,
       "high": false,
-      "line": 55
+      "line": 47
+    },
+    "src/app/api/verify/route.ts::normalizeHeaderValues": {
+      "cc": 3,
+      "sloc": 4,
+      "mass": 6.0,
+      "high": false,
+      "line": 52
+    },
+    "src/app/api/verify/route.ts::buildLayers": {
+      "cc": 5,
+      "sloc": 22,
+      "mass": 23.5,
+      "high": false,
+      "line": 58
+    },
+    "src/app/api/verify/route.ts::cloudflareCheck": {
+      "cc": 3,
+      "sloc": 5,
+      "mass": 6.7,
+      "high": false,
+      "line": 86
+    },
+    "src/app/api/verify/route.ts::buildVerifyResponse": {
+      "cc": 4,
+      "sloc": 26,
+      "mass": 20.4,
+      "high": false,
+      "line": 93
+    },
+    "src/app/api/verify/route.ts::POST": {
+      "cc": 7,
+      "sloc": 18,
+      "mass": 29.7,
+      "high": false,
+      "line": 120
     },
     "src/app/blog/[slug]/page.tsx::generateStaticParams": {
       "cc": 1,
@@ -1116,54 +1151,89 @@
       "high": false,
       "line": 147
     },
+    "src/lib/terms.ts::applyHeaderField": {
+      "cc": 7,
+      "sloc": 14,
+      "mass": 26.2,
+      "high": false,
+      "line": 64
+    },
+    "src/lib/terms.ts::applyUnsigned": {
+      "cc": 4,
+      "sloc": 4,
+      "mass": 8.0,
+      "high": false,
+      "line": 80
+    },
+    "src/lib/terms.ts::splitTermsLine": {
+      "cc": 3,
+      "sloc": 11,
+      "mass": 9.9,
+      "high": false,
+      "line": 96
+    },
+    "src/lib/terms.ts::applyRuleTokens": {
+      "cc": 8,
+      "sloc": 11,
+      "mass": 26.5,
+      "high": false,
+      "line": 109
+    },
+    "src/lib/terms.ts::parsePurposeRule": {
+      "cc": 8,
+      "sloc": 21,
+      "mass": 36.7,
+      "high": false,
+      "line": 125
+    },
     "src/lib/terms.ts::parseTermsTxt": {
-      "cc": 33,
-      "sloc": 72,
-      "mass": 280.0,
-      "high": true,
-      "line": 67
+      "cc": 10,
+      "sloc": 30,
+      "mass": 54.8,
+      "high": false,
+      "line": 151
     },
     "src/lib/terms.ts::detectTermsSignals": {
       "cc": 8,
       "sloc": 21,
       "mass": 36.7,
       "high": false,
-      "line": 154
+      "line": 190
     },
     "src/lib/terms.ts::<anonymous>": {
       "cc": 2,
       "sloc": 4,
       "mass": 4.0,
       "high": false,
-      "line": 158
+      "line": 194
     },
     "src/lib/terms.ts::priceText": {
       "cc": 2,
       "sloc": 4,
       "mass": 4.0,
       "high": false,
-      "line": 178
+      "line": 214
     },
     "src/lib/terms.ts::summarizePurposes": {
       "cc": 5,
       "sloc": 18,
       "mass": 21.2,
       "high": false,
-      "line": 184
+      "line": 220
     },
     "src/lib/terms.ts::termsTxtLayer": {
       "cc": 8,
       "sloc": 31,
       "mass": 44.5,
       "high": false,
-      "line": 207
+      "line": 243
     },
     "src/lib/terms.ts::checkTermsTxt": {
       "cc": 3,
       "sloc": 19,
       "mass": 13.1,
       "high": false,
-      "line": 255
+      "line": 291
     },
     "src/lib/timeline.ts::parseWaybackCdx": {
       "cc": 13,
@@ -1396,47 +1466,96 @@
       "high": false,
       "line": 57
     },
-    "wiki-viewer/serve.py::render_markdown": {
-      "cc": 33,
-      "sloc": 59,
-      "mass": 253.5,
-      "high": true,
+    "wiki-viewer/serve.py::_fence": {
+      "cc": 5,
+      "sloc": 16,
+      "mass": 20.0,
+      "high": false,
       "line": 66
+    },
+    "wiki-viewer/serve.py::_heading": {
+      "cc": 2,
+      "sloc": 6,
+      "mass": 4.9,
+      "high": false,
+      "line": 85
+    },
+    "wiki-viewer/serve.py::_hr": {
+      "cc": 2,
+      "sloc": 4,
+      "mass": 4.0,
+      "high": false,
+      "line": 93
+    },
+    "wiki-viewer/serve.py::_blockquote": {
+      "cc": 5,
+      "sloc": 8,
+      "mass": 14.1,
+      "high": false,
+      "line": 99
+    },
+    "wiki-viewer/serve.py::_table": {
+      "cc": 6,
+      "sloc": 10,
+      "mass": 19.0,
+      "high": false,
+      "line": 109
+    },
+    "wiki-viewer/serve.py::_list": {
+      "cc": 4,
+      "sloc": 9,
+      "mass": 12.0,
+      "high": false,
+      "line": 124
+    },
+    "wiki-viewer/serve.py::_paragraph": {
+      "cc": 7,
+      "sloc": 10,
+      "mass": 22.1,
+      "high": false,
+      "line": 136
+    },
+    "wiki-viewer/serve.py::render_markdown": {
+      "cc": 4,
+      "sloc": 15,
+      "mass": 15.5,
+      "high": false,
+      "line": 153
     },
     "wiki-viewer/serve.py::render_table": {
       "cc": 6,
       "sloc": 8,
       "mass": 17.0,
       "high": false,
-      "line": 143
+      "line": 170
     },
     "wiki-viewer/serve.py::page_html": {
       "cc": 3,
       "sloc": 7,
       "mass": 7.9,
       "high": false,
-      "line": 153
+      "line": 180
     },
     "wiki-viewer/serve.py::do_GET": {
       "cc": 5,
       "sloc": 22,
       "mass": 23.5,
       "high": false,
-      "line": 200
+      "line": 227
     },
     "wiki-viewer/serve.py::log_message": {
       "cc": 1,
       "sloc": 2,
       "mass": 1.4,
       "high": false,
-      "line": 223
+      "line": 250
     },
     "wiki-viewer/serve.py::main": {
       "cc": 2,
       "sloc": 9,
       "mass": 6.0,
       "high": false,
-      "line": 226
+      "line": 253
     }
   },
   "collisions": [

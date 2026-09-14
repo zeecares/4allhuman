@@ -63,82 +63,109 @@ def inline(t):
     t = re.sub(r'(?<!\*)\*([^*]+)\*(?!\*)', r'<em>\1</em>', t)
     return t
 
+def _fence(lines, i):
+    """Fenced code / mermaid block; returns (html, next_i) or None."""
+    m = re.match(r'^```(\w*)\s*$', lines[i])
+    if not m:
+        return None
+    lang = m.group(1)
+    buf = []
+    i += 1
+    n = len(lines)
+    while i < n and not lines[i].startswith("```"):
+        buf.append(lines[i]); i += 1
+    i += 1  # skip closing ```
+    code = "\n".join(buf)
+    if lang == "mermaid":
+        return ('<div class="mermaid-block"><div class="mermaid-label">Mermaid diagram (source — render in VS Code)</div>'
+                f'<pre class="code"><code>{escape(code)}</code></pre></div>', i)
+    return (f'<pre class="code"><code>{escape(code)}</code></pre>', i)
+
+
+def _heading(lines, i):
+    m = re.match(r'^(#{1,6})\s+(.*)', lines[i])
+    if not m:
+        return None
+    lvl = len(m.group(1))
+    return (f'<h{lvl}>{inline(m.group(2))}</h{lvl}>', i + 1)
+
+
+def _hr(lines, i):
+    if not re.match(r'^---+\s*$', lines[i]):
+        return None
+    return ('<hr>', i + 1)
+
+
+def _blockquote(lines, i):
+    if not lines[i].startswith('>'):
+        return None
+    buf = []
+    n = len(lines)
+    while i < n and lines[i].startswith('>'):
+        buf.append(re.sub(r'^>\s?', '', lines[i])); i += 1
+    return (f'<blockquote>{"<br>".join(inline(b) for b in buf)}</blockquote>', i)
+
+
+def _table(lines, i):
+    n = len(lines)
+    if not (lines[i].strip().startswith('|') and i + 1 < n
+            and re.match(r'^\s*\|[\s:|-]+\|\s*$', lines[i + 1])):
+        return None
+    rows = [lines[i]]
+    i += 1
+    while i < n and lines[i].strip().startswith('|'):
+        rows.append(lines[i]); i += 1
+    return (render_table(rows), i)
+
+
+_LIST_ITEM = re.compile(r'^\s*(?:[-*]|\d+\.)\s+')
+
+
+def _list(lines, i):
+    """Unordered / ordered list run (rendered as <ul> either way)."""
+    if not _LIST_ITEM.match(lines[i]):
+        return None
+    buf = []
+    n = len(lines)
+    while i < n and _LIST_ITEM.match(lines[i]):
+        item = _LIST_ITEM.sub('', lines[i])
+        buf.append(f'<li>{inline(item)}</li>'); i += 1
+    return (f'<ul>{"".join(buf)}</ul>', i)
+
+
+def _paragraph(lines, i):
+    """Plain text run until a blank line or the start of another block."""
+    if not lines[i].strip():
+        return None
+    n = len(lines)
+    buf = [lines[i]]
+    i += 1
+    while i < n and lines[i].strip() and not lines[i].startswith(('#', '>', '|', '```')) \
+            and not _LIST_ITEM.match(lines[i]):
+        buf.append(lines[i]); i += 1
+    return (f'<p>{" ".join(inline(b) for b in buf)}</p>', i)
+
+
+# Tried in order; the first renderer to claim a line owns the block.
+_BLOCK_RENDERERS = (_fence, _heading, _hr, _blockquote, _table, _list, _paragraph)
+
+
 def render_markdown(text):
     lines = text.split("\n")
     out = []
     i = 0
     n = len(lines)
     while i < n:
-        line = lines[i]
-
-        # fenced code / mermaid
-        m = re.match(r'^```(\w*)\s*$', line)
-        if m:
-            lang = m.group(1)
-            buf = []
-            i += 1
-            while i < n and not lines[i].startswith("```"):
-                buf.append(lines[i]); i += 1
-            i += 1  # skip closing ```
-            code = "\n".join(buf)
-            if lang == "mermaid":
-                out.append('<div class="mermaid-block"><div class="mermaid-label">Mermaid diagram (source — render in VS Code)</div>'
-                           f'<pre class="code"><code>{escape(code)}</code></pre></div>')
-            else:
-                out.append(f'<pre class="code"><code>{escape(code)}</code></pre>')
-            continue
-
-        # headings
-        m = re.match(r'^(#{1,6})\s+(.*)', line)
-        if m:
-            lvl = len(m.group(1))
-            out.append(f'<h{lvl}>{inline(m.group(2))}</h{lvl}>')
-            i += 1; continue
-
-        # horizontal rule (standalone)
-        if re.match(r'^---+\s*$', line):
-            out.append('<hr>'); i += 1; continue
-
-        # blockquote
-        if line.startswith('>'):
-            buf = []
-            while i < n and lines[i].startswith('>'):
-                buf.append(re.sub(r'^>\s?', '', lines[i])); i += 1
-            out.append(f'<blockquote>{"<br>".join(inline(b) for b in buf)}</blockquote>')
-            continue
-
-        # table
-        if line.strip().startswith('|') and i + 1 < n and re.match(r'^\s*\|[\s:|-]+\|\s*$', lines[i+1]):
-            rows = [line]
-            i += 1
-            while i < n and lines[i].strip().startswith('|'):
-                rows.append(lines[i]); i += 1
-            out.append(render_table(rows))
-            continue
-
-        # unordered / ordered list
-        if re.match(r'^\s*[-*]\s+', line) or re.match(r'^\s*\d+\.\s+', line):
-            buf = []
-            while i < n and (re.match(r'^\s*[-*]\s+', lines[i]) or re.match(r'^\s*\d+\.\s+', lines[i])):
-                item = re.sub(r'^\s*(?:[-*]|\d+\.)\s+', '', lines[i])
-                buf.append(f'<li>{inline(item)}</li>'); i += 1
-            tag = 'ul' if buf and '<li>' in buf[0] and re.match(r'^\s*[-*]\s', lines[0] if False else lines[max(0,i-len(buf))]) else 'ul'
-            out.append(f'<ul>{"".join(buf)}</ul>')
-            continue
-
-        # blank
-        if not line.strip():
-            i += 1; continue
-
-        # paragraph (gather until blank / block start)
-        buf = [line]
-        i += 1
-        while i < n and lines[i].strip() and not lines[i].startswith(('#', '>', '|', '```')) \
-                and not re.match(r'^\s*[-*]\s+', lines[i]) and not re.match(r'^\s*\d+\.\s+', lines[i]):
-            buf.append(lines[i]); i += 1
-        out.append(f'<p>{" ".join(inline(b) for b in buf)}</p>')
-
+        for renderer in _BLOCK_RENDERERS:
+            rendered = renderer(lines, i)
+            if rendered is not None:
+                html_block, i = rendered
+                out.append(html_block)
+                break
+        else:
+            i += 1  # blank line
     return "\n".join(out)
+
 
 def render_table(rows):
     header = [c.strip() for c in rows[0].strip().strip('|').split('|')]
