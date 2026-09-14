@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "tool": "code-erosion",
+  "created": "2026-09-13T00:00:00Z",
+  "note": "Seed baseline from the 2026-09-13 R3 scan of 4allhuman @01f5863 (repo-level numbers exact; SLOC approximate; top-5 high-CC functions only). Refresh with `code-erosion . --write-baseline .code-erosion.json` on the next PR to get full per-file/per-function detail.",
+  "metrics": {
+    "verbosity": 0.084,
+    "erosion": 0.683,
+    "total_loc": 5800,
+    "files_scanned": 36,
+    "total_functions": 0,
+    "high_cc_functions": 5
+  },
+  "files": {},
+  "functions": {
+    "src/app/page.tsx::Home": {"cc": 120, "sloc": 1079, "mass": 3941.8, "high": true, "line": 327},
+    "src/lib/terms.ts::parseTermsTxt": {"cc": 33, "sloc": 72, "mass": 280.0, "high": true, "line": 67},
+    "wiki-viewer/serve.py::render_markdown": {"cc": 33, "sloc": 59, "mass": 253.5, "high": true, "line": 66},
+    "src/app/page.tsx::CloudflareCheckCard": {"cc": 19, "sloc": 103, "mass": 192.8, "high": true, "line": 210},
+    "src/app/api/verify/route.ts::POST": {"cc": 19, "sloc": 75, "mass": 164.5, "high": true, "line": 33}
+  },
+  "collisions": []
+}
