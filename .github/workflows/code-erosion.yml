@@ -1,0 +1,17 @@
+name: code-erosion
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  erosion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: zeecares/code-erosion@main
+        with:
+          mode: gate
+          threshold: "0.01"
